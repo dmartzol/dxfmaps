@@ -1,3 +1,3 @@
 # map2svg
 
-Python program to download a data from OSM and export thte shape of a country in SVG. 
+Python program to download data from OSM and export the shape of a country in SVG. 
