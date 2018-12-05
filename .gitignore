@@ -1,3 +1,7 @@
 *.pyc
 __pycache__
 /cache
+env
+shapefiles
+.DS_Store
+*.svg
