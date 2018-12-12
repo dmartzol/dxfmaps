@@ -47,8 +47,8 @@ def simplify(polygons, tolerance = 2000, verbose = False):
                 )
             )
 
-def save_svg(full_map, filename='out.svg', stroke_width=0.1, size="500", units="px"):
-    size_and_units = "{}{}".format(size, units)
+def save_svg(full_map, filename='out.svg', stroke_width=1.0, size=500, units="px"):
+    size_and_units = "{}{}".format(str(size), units)
     poligon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
     file = open(filename, 'w')
     svg_style = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n"

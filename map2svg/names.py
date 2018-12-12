@@ -18,7 +18,7 @@ spanish_comunities = [
     "Euskadi, Spain"
 ]
 
-USA_STATES = [
+USA = [
     "West Virginia",
     "Illinois",
     "Maryland",
