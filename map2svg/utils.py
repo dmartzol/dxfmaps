@@ -1,32 +1,45 @@
-import osmnx as ox
 import shapely
+from shapely.geometry import shape
 
-def fetch(list_of_names):
-    ox.config(use_cache=True)
-    geodataframe = ox.gdf_from_places(list_of_names)
-    return geodataframe
+def list_of_countries(sf):
+    name_en = "NAME_EN"
+    for x in sf.shapeRecords():
+        print("Name: {} ({})".format(x.record[name_en], x.record.oid))
+
+def item_info(sf, n):
+    fields = [item[0] for item in sf.fields[1:]]
+    record = sf.record(n)
+    print("\n Info for item {}\n".format(n))
+    for field in fields:
+        print("{}: {}".format(field, record[field]))
 
 def project(geodataframe):
-    return ox.project_gdf(geodataframe)
+    # winkel tripel projection (epsg=54018) 54019
+    # {'init': 'epsg:3395'}
+    return geodataframe.to_crs({'init': 'epsg:3395'})
+    # return geodataframe.to_crs(epsg=54019)
 
-
-def dataframe2polygons(geodataframe):
-    polygons = []
-    for index, row in geodataframe.iterrows():
-        if isinstance(row.geometry, shapely.geometry.multipolygon.MultiPolygon):
-            for geom in row.geometry.geoms:
-                polygons.append(geom)
-        elif isinstance(row.geometry, shapely.geometry.polygon.Polygon):
-            polygons.append(row.geometry)
-        elif isinstance(row.geometry, shapely.geometry.linestring.LineString):
-            print("")
-            print("{} geometry is LineString".format(row.place_name))
-            print("This linestring is ring: {}".format(row.geometry.is_ring))
-            # TODO: Convert linestring to polygon
-            # polygons.append(row.geometry)
+def shapefile2polygons(sf):
+    geoms = []
+    for item in sf.shapes():
+        geom = shape(item.__geo_interface__)
+        if isinstance(geom, shapely.geometry.polygon.Polygon):
+            geoms.append(geom)
+        elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
+            geom = max_area_polygon(geom)
         else:
             raise Exception('Found non valid geometry')
-    return polygons
+        geoms.append(geom)
+    return geoms
+
+def max_area_polygon(multipolygon):
+    # TODO: Try using max and its index
+    # index, value = max(list(multipolygon), key=lambda item: item.area)
+    p = list(multipolygon)[0]
+    for polygon in list(multipolygon):
+        if polygon.area > p.area:
+            p = polygon
+    return p
 
 def filter_by_area(polygons, area_thresold = 1000000000):
     # TODO: Figure units for area!

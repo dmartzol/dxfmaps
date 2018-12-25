@@ -1,25 +1,29 @@
 from map2svg import names
-from map2svg.utils import project, filter_by_area, dataframe2polygons, simplify, save_svg
-import osmnx as ox
+from map2svg.utils import filter_by_area, simplify, save_svg, shapefile2polygons, item_info, list_of_countries
 import shapely
-import geopandas as gpd
+import sys
+import shapefile
 
+US_STATES = "shapefiles/cb_2017_us_state_500k/cb_2017_us_state_500k.shp"
+WORLD_COUNTRIES = "shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
+WORLD_COUNTRIES2 = "shapefiles/ne_50m_admin_0_countries/ne_50m_admin_0_countries.shp"
+STATES_PROVINCES = "shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp"
 
 def main():
-    path = "shapefiles/cb_2017_us_state_500k/cb_2017_us_state_500k.shp"
-    shapefile = gpd.read_file(path)
-    for i, row in shapefile.iterrows():
-        if row.NAME not in names.USA:
-            shapefile.drop(index = i, inplace = True)
-    states_gdf_projection = project(shapefile)
-    polygons = dataframe2polygons(states_gdf_projection)
+    sf = shapefile.Reader(WORLD_COUNTRIES)
+    # item_info(sf, 0)
+    # list_of_countries(sf)
+    print("Number of records: {}".format(sf.numRecords))
+    polygons = shapefile2polygons(sf)
+    records = sf.records()
+    print(list_of_countries(sf))
 
-    print("States in list: {}".format(len(names.USA)))
     print("Polygons before filtering by area: {}".format(len(polygons)))
-    polygons = filter_by_area(polygons, area_thresold = 1000000000)
+    polygons = filter_by_area(polygons, area_thresold = .5)
+    assert (len(polygons) > 0), "Filtered too many polygons"
     print("Polygons after filtering by area: {}".format(len(polygons)))
     
-    simplify(polygons, tolerance = 5000)
+    simplify(polygons, tolerance = .3)
 
     # Translating the map to the origin
     full_map = shapely.geometry.MultiPolygon(polygons)
@@ -28,7 +32,7 @@ def main():
     full_map = shapely.affinity.translate(full_map, xoff=offset_x, yoff=offset_y)
 
     # Scaling the polygons to reduce their size
-    size = 350
+    size = 200
     units = "mm"
     factor = (3.77 * size) / max(full_map.bounds)
     # factor = 1.91787670701e-05
@@ -38,7 +42,7 @@ def main():
     full_map = shapely.affinity.scale(full_map, xfact=factor, yfact=factor, origin=(0, 0))
     print("New bounds: {}".format(full_map.bounds))
 
-    save_svg(full_map, size=size, units=units)
+    save_svg(full_map, size=size, units=units, stroke_width=.5)
     interior = full_map.buffer(0.5, cap_style=2, join_style=1)
     interior = interior.buffer(-1.0, cap_style=2, join_style=1)
-    save_svg(interior, filename='out_buffered.svg', size=size, units=units)
+    save_svg(interior, filename='out_buffered.svg', size=size, units=units, stroke_width=.5)

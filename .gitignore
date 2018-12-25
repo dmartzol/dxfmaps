@@ -1,6 +1,7 @@
 *.pyc
 __pycache__
 /cache
+.vscode/
 env
 shapefiles
 .DS_Store
