@@ -1,36 +1,25 @@
 import shapely
 from shapely.geometry import shape
 
-def list_of_countries(sf):
-    name_en = "NAME_EN"
-    for x in sf.shapeRecords():
-        print("Name: {} ({})".format(x.record[name_en], x.record.oid))
-
-def item_info(sf, n):
-    fields = [item[0] for item in sf.fields[1:]]
-    record = sf.record(n)
-    print("\n Info for item {}\n".format(n))
-    for field in fields:
-        print("{}: {}".format(field, record[field]))
-
-def project(geodataframe):
-    # winkel tripel projection (epsg=54018) 54019
-    # {'init': 'epsg:3395'}
-    return geodataframe.to_crs({'init': 'epsg:3395'})
-    # return geodataframe.to_crs(epsg=54019)
-
-def shapefile2polygons(sf):
-    geoms = []
-    for item in sf.shapes():
-        geom = shape(item.__geo_interface__)
-        if isinstance(geom, shapely.geometry.polygon.Polygon):
-            geoms.append(geom)
-        elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
-            geom = max_area_polygon(geom)
-        else:
-            raise Exception('Found non valid geometry')
-        geoms.append(geom)
+def shapefile2polygons(sf, continent=None, min_area=None):
+    if continent is None:
+        geoms = [build_polygon(shapeRecord) for shapeRecord in sf.shapeRecords()]
+    else:
+        geoms = []
+        for shapeRecord in sf.shapeRecords():
+            if shapeRecord.record["CONTINENT"] == continent:
+                geoms.append(build_polygon(shapeRecord))
+    assert len(geoms)>0, "Countries not found"
     return geoms
+
+def build_polygon(shapeRecord):
+    geom = shape(shapeRecord.shape.__geo_interface__)
+    if isinstance(geom, shapely.geometry.polygon.Polygon):
+        return geom
+    elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
+        return max_area_polygon(geom)
+    else:
+        raise Exception('Found non valid geometry')
 
 def max_area_polygon(multipolygon):
     # TODO: Try using max and its index
@@ -44,6 +33,38 @@ def max_area_polygon(multipolygon):
 def filter_by_area(polygons, area_thresold = 1000000000):
     # TODO: Figure units for area!
     return [polygon for polygon in polygons if polygon.area > area_thresold]
+
+def list_of_countries(sf):
+    for x in sf.shapeRecords():
+        print("Name: {} ({})".format(x.record["NAME"], x.record.oid))
+
+def list_of_continents(sf):
+    print("\n Continents available: ")
+    continents = set()
+    for x in sf.shapeRecords():
+        continents.add(x.record["CONTINENT"])
+    for item in continents:
+        print(item)
+    print()
+
+def item_info(sf, n):
+    fields = [item[0] for item in sf.fields[1:]]
+    record = sf.record(n)
+    print("\n Info for item {}\n".format(n))
+    for field in fields:
+        print("{}: {}".format(field, record[field]))
+
+def countries_by_continent(sf, continent):
+    records = sf.records()
+    for item in records:
+        if item['CONTINENT'] == continent:
+            print(item["NAME"], item.oid)
+
+def project(geodataframe):
+    # winkel tripel projection (epsg=54018) 54019
+    # {'init': 'epsg:3395'}
+    return geodataframe.to_crs({'init': 'epsg:3395'})
+    # return geodataframe.to_crs(epsg=54019)
 
 def simplify(polygons, tolerance = 2000, verbose = False):
     # TODO: calculate adequate tolerance
