@@ -1,11 +1,16 @@
 import shapely
 from shapely.geometry import shape
+from map2svg.utils import save_svg
 
 class Map(object):
     def __init__(self, sf, continent=None):
         self.sf = sf
         self.continent = continent
         self.polygons = self.shapefile2polygons()
+        self.full_map = None
+        self.size = None
+        self.units = None
+        self.factor = None
     
     def shapefile2polygons(self):
         if self.continent is None:
@@ -43,3 +48,47 @@ class Map(object):
     
     def full_map(self):
         return shapely.geometry.MultiPolygon(polygons)
+    
+    def simplify(self, tolerance = 2000, verbose = False):
+        # TODO: calculate adequate tolerance
+        for i, polygon in enumerate(self.polygons):
+            nodes_before = len(list(polygon.exterior.coords))
+            self.polygons[i] = self.polygons[i].simplify(tolerance=tolerance)
+            if verbose:
+                nodes = len(list(polygon.exterior.coords))
+                print("Polygon nodes reduced by {:.1f}%, from {} to {}".format(
+                    100*(nodes_before-nodes)/float(nodes_before),
+                    nodes_before,
+                    nodes
+                    )
+                )
+    def translate_to_center(self):
+        # Translating the map to the origin
+        # TODO - Choose a better name
+        self.full_map = shapely.geometry.MultiPolygon(self.polygons)
+        offset_x = - min(self.full_map.bounds[0], self.full_map.bounds[2])
+        offset_y = - min(self.full_map.bounds[1], self.full_map.bounds[3])
+        self.full_map = shapely.affinity.translate(self.full_map, xoff=offset_x, yoff=offset_y)
+    
+    def scale(self):
+        # Scaling the map to reduce its size
+        self.size = 200
+        self.units = "mm"
+        self.factor = (3.77 * self.size) / max(self.full_map.bounds)
+        # print("")
+        # print("Scaling factor: {}".format(self.factor))
+        # print("Old bounds: {}".format(self.full_map.bounds))
+        self.full_map = shapely.affinity.scale(self.full_map, xfact=self.factor, yfact=self.factor, origin=(0, 0))
+        # print("New bounds: {}".format(self.full_map.bounds))
+    
+    def to_svg(self, stroke_width=.5):
+        save_svg(self.full_map, size=self.size, units=self.units, stroke_width=stroke_width)
+        interior = self.full_map.buffer(0.5, cap_style=2, join_style=1)
+        interior = interior.buffer(-1.0, cap_style=2, join_style=1)
+        save_svg(
+            interior,
+            filename='out_buffered.svg',
+            size=self.size,
+            units=self.units,
+            stroke_width=stroke_width
+        )

@@ -47,10 +47,13 @@ def list_of_continents(sf):
         print(item)
     print()
 
-def item_info(sf, n):
+def item_info(sf, row):
+    """
+    Prints every field and its values for the item in the specified row of the shapefile.
+    """
     fields = [item[0] for item in sf.fields[1:]]
-    record = sf.record(n)
-    print("\n Info for item {}\n".format(n))
+    record = sf.record(row)
+    print("\n Info for item {}\n".format(row))
     for field in fields:
         print("{}: {}".format(field, record[field]))
 
@@ -65,21 +68,6 @@ def project(geodataframe):
     # {'init': 'epsg:3395'}
     return geodataframe.to_crs({'init': 'epsg:3395'})
     # return geodataframe.to_crs(epsg=54019)
-
-def simplify(polygons, tolerance = 2000, verbose = False):
-    # TODO: calculate adequate tolerance
-    for i, polygon in enumerate(polygons):
-        polygons[i] = shapely.geometry.Polygon(polygon.exterior.coords)
-        nodes_before = len(list(polygon.exterior.coords))
-        polygons[i] = polygons[i].simplify(tolerance=tolerance)
-        if verbose:
-            nodes = len(list(polygons[i].exterior.coords))
-            print("Polygon nodes reduced by {:.1f}%, from {} to {}".format(
-                100*(nodes_before-nodes)/float(nodes_before),
-                nodes_before,
-                nodes
-                )
-            )
 
 def save_svg(full_map, filename='out.svg', stroke_width=1.0, size=500, units="px"):
     size_and_units = "{}{}".format(str(size), units)
