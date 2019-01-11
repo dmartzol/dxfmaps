@@ -4,6 +4,17 @@ def fetch(list_of_names):
     geodataframe = ox.gdf_from_places(list_of_names)
     return geodataframe
 
+def shapefile2polygons_old2(self):
+        if self.continent is None:
+            geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
+        else:
+            geoms = []
+            for shapeRecord in self.sf.shapeRecords():
+                if shapeRecord.record["CONTINENT"] == self.continent:
+                    geoms.append(self.build_polygon(shapeRecord))
+        assert len(geoms)>0, "Countries not found"
+        return geoms
+
 def shapefile2polygons_old(sf):
     return [shape(x.shape.__geo_interface__) for x in sf.shapeRecords()]
 

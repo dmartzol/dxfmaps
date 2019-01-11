@@ -47,15 +47,17 @@ def list_of_continents(sf):
         print(item)
     print()
 
-def item_info(sf, row):
+def item_info(sf, row, field=None):
     """
     Prints every field and its values for the item in the specified row of the shapefile.
     """
     fields = [item[0] for item in sf.fields[1:]]
     record = sf.record(row)
-    print("\n Info for item {}\n".format(row))
-    for field in fields:
-        print("{}: {}".format(field, record[field]))
+    if field:
+        print("{}: {}".format(fields[field], record[field]))
+    else:
+        for i, field in enumerate(fields):
+            print("{} - {}: {}".format(i, field, record[field]))
 
 def countries_by_continent(sf, continent):
     records = sf.records()
