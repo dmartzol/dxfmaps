@@ -1,38 +1,4 @@
 import shapely
-from shapely.geometry import shape
-
-def shapefile2polygons(sf, continent=None, min_area=None):
-    if continent is None:
-        geoms = [build_polygon(shapeRecord) for shapeRecord in sf.shapeRecords()]
-    else:
-        geoms = []
-        for shapeRecord in sf.shapeRecords():
-            if shapeRecord.record["CONTINENT"] == continent:
-                geoms.append(build_polygon(shapeRecord))
-    assert len(geoms)>0, "Countries not found"
-    return geoms
-
-def build_polygon(shapeRecord):
-    geom = shape(shapeRecord.shape.__geo_interface__)
-    if isinstance(geom, shapely.geometry.polygon.Polygon):
-        return geom
-    elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
-        return max_area_polygon(geom)
-    else:
-        raise Exception('Found non valid geometry')
-
-def max_area_polygon(multipolygon):
-    # TODO: Try using max and its index
-    # index, value = max(list(multipolygon), key=lambda item: item.area)
-    p = list(multipolygon)[0]
-    for polygon in list(multipolygon):
-        if polygon.area > p.area:
-            p = polygon
-    return p
-
-def filter_by_area(polygons, area_thresold = 1000000000):
-    # TODO: Figure units for area!
-    return [polygon for polygon in polygons if polygon.area > area_thresold]
 
 def list_of_countries(sf):
     for x in sf.shapeRecords():

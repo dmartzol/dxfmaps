@@ -1,7 +1,4 @@
 # map2DXF
--
-
-## This README is work in progress, some of the examples here don't work yet.
 
 Python module to generate vector maps from ESRI Shapefiles with the purpose of cutting custom maps in CNC controlled machines(e.g. Laser cutters or CNC milling machines).
 
@@ -61,4 +58,4 @@ This project is licensed under the MIT License
 
 ## Acknowledgments
 
-* Made with data from Natural Earth, using the maps for countries or states/provinces.
+*  Made with data from Natural Earth, using the maps for countries and states/provinces.
