@@ -10,7 +10,7 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 - [ ] Specify the desired width of the final SVG/DXF.
 - [x] Generate a vector map of all countries in a continent by just specifying the name of the continent.
 - [x] Generate a map reducing the number of points in it by simplifying polygons.
-- [ ] <del>Generate a map of all the provinces/states in a country specifying the name of the country.</del>
+- [ ] Generate a map of all the provinces/states in a country specifying the name of the country.
 
 ## Installation
 
