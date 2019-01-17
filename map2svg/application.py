@@ -4,9 +4,10 @@ import shapefile
 
 VERBOSE = False
 
+# TODO - Implement DXF output
 # TODO - Change projections
 # TODO - Implement parsing options from CLI
-# TODO - Implement printing county names
+# TODO - Implement printing country names
 
 US_STATES = "shapefiles/cb_2017_us_state_500k/cb_2017_us_state_500k.shp"
 WORLD_COUNTRIES = "shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
@@ -15,9 +16,7 @@ STATES_PROVINCES = "shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_st
 
 def main():
     sf = shapefile.Reader(WORLD_COUNTRIES)
-    # item_info(sf, 3)
-    # print("Number of records: {}".format(sf.numRecords))
-    map = Map(sf, continent='north america')
+    map = Map(sf, continent='europe')
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
