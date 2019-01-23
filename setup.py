@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='map2dxf',
+setup(name='dxfmaps',
       version='0.1',
       description='Generate maps ',
       url='http://github.com/storborg/funniest',

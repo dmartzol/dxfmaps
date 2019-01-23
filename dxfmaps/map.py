@@ -1,6 +1,6 @@
 import shapely
 from shapely.geometry import shape
-from map2svg.utils import save_svg
+from dxfmaps.utils import save_svg
 
 class LandNotFound(ValueError):
     pass

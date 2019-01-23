@@ -1,6 +1,6 @@
-# from map2svg.utils import *
-# from map2svg import Map
-import map2svg
+# from dxfmaps.utils import *
+# from dxfmaps import Map
+import dxfmaps
 import shapefile
 
 VERBOSE = False
@@ -17,7 +17,7 @@ STATES_PROVINCES = "shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_st
 
 def main():
     sf = shapefile.Reader(WORLD_COUNTRIES)
-    map = map2svg.Map(sr, continent='europe')
+    map = dxfmaps.Map(sr, continent='europe')
     # map = Map(sf, continent='europe')
     # map.filter_by_area(area_thresold = .5)
     # map.simplify(tolerance=.05)
