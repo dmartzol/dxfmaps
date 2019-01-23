@@ -1,4 +1,4 @@
-# map2DXF (Work In Progress)
+# dxfmaps (Work In Progress)
 
 Python module to generate vector maps from ESRI Shapefiles with the purpose of cutting custom maps in CNC controlled machines(e.g. Laser cutters or CNC milling machines).
 
