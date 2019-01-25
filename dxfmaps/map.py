@@ -106,9 +106,10 @@ class Map(object):
         self.full_map = shapely.affinity.scale(self.full_map, xfact=self.factor, yfact=self.factor, origin=(0, 0))
         # print("New bounds: {}".format(self.full_map.bounds))
 
-    def to_svg(self, stroke_width=.5, save_back_buffered=False):
+    def to_svg(self, filename='out.svg', stroke_width=.5, save_back_buffered=False):
         save_svg(
             self.full_map,
+            filename=filename,
             size=self.size,
             units=self.units,
             stroke_width=stroke_width
@@ -118,7 +119,7 @@ class Map(object):
             interior = interior.buffer(-1.0, cap_style=2, join_style=1)
             save_svg(
                 interior,
-                filename='out_buffered.svg',
+                filename='buffered.svg',
                 size=self.size,
                 units=self.units,
                 stroke_width=stroke_width
