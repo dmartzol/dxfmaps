@@ -12,7 +12,6 @@ VERBOSE = False
 
 WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
 
-
 def main():
     sf = shapefile.Reader(sys.argv[1])
     map = Map(sf, continent='europe')
