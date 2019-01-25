@@ -1,11 +1,13 @@
 from setuptools import setup
 
-setup(name='dxfmaps',
+setup(
+	name='dxfmaps',
       version='0.1',
-      description='Generate maps ',
-      url='http://github.com/storborg/funniest',
-      author='Flying Circus',
-      author_email='flyingcircus@example.com',
+      description='Generates maps from shapefiles',
+      url='http://github.com/dmartzol/dxfmaps',
+      author='Daniel Martinez',
+      author_email='danielmartinezolivas@gmail.com',
       license='MIT',
-      packages=['funniest'],
-      zip_safe=False)
+      packages=['dxfmaps'],
+      install_requires=['pyshp', 'Shapely']
+	)
