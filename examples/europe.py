@@ -12,9 +12,10 @@ VERBOSE = False
 # TODO - Change name of output buffered file
 
 WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
+WORLD_PROVINCES = '/shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp'
 
 def main():
-    sf = shapefile.Reader(sys.argv[1])
+    sf = shapefile.Reader(WORLD_COUNTRIES)
     map = Map(sf, continent='europe')
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)

@@ -3,7 +3,6 @@ __pycache__
 /cache
 .vscode/
 env
-shapefiles
 .DS_Store
 *.svg
 dxfmaps.egg-info
