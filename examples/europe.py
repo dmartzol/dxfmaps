@@ -22,6 +22,7 @@ def main():
     map.translate_to_center()
     map.scale()
     map.to_svg(filename='europe.svg')
+    map.to_dxf()
 
 if __name__ == "__main__":
     main()
