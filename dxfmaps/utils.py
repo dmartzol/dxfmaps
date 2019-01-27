@@ -1,5 +1,8 @@
 import shapely
 
+def scale_adjust(n):
+    return -1.3624*(0.001 - n)
+
 def list_of_countries(sf):
     for x in sf.shapeRecords():
         print("Name: {} ({})".format(x.record["NAME"], x.record.oid))

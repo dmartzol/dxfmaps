@@ -17,8 +17,8 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 Install with:
 
 ```
-git clone https://github.com/dmartzol/map2svg.git
-cd map2SVG
+git clone https://github.com/dmartzol/dxfmaps.git
+cd dxfmaps
 pip install -e .
 ```
 
@@ -30,10 +30,10 @@ pip install -e .
 
 ## Usage and examples
 ```python
-import map2svg
+import dxfmaps
 
 def main():
-    map = map2svg.Map('shapefile.shp', continent='europe')
+    map = dxfmaps.Map('shapefile.shp', continent='europe')
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
@@ -58,4 +58,4 @@ This project is licensed under the MIT License
 
 ## Acknowledgments
 
-*  Made with data from Natural Earth, using the maps for countries and states/provinces.
+*  Built using data from Natural Earth, using the maps for countries and states/provinces.

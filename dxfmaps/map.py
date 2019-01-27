@@ -1,6 +1,7 @@
 import shapely
+import ezdxf
 from shapely.geometry import shape
-from dxfmaps.utils import save_svg
+from dxfmaps.utils import save_svg, scale_adjust
 
 class LandNotFound(ValueError):
     pass
@@ -124,3 +125,15 @@ class Map(object):
                 units=self.units,
                 stroke_width=stroke_width
             )
+    def to_dxf(self, filename='out.dxf'):
+        drawing = ezdxf.new('R2000')
+        modelspace = drawing.modelspace()
+        drawing.layers.new('BOUNDARIES_LAYER', dxfattribs={'color': 255})
+        heigth = scale_adjust(3.0)
+        modelspace.add_text('Test', dxfattribs={'layer': 'TEXTLAYER', 'height': heigth, 'style': 'standard'}).set_pos((0, 0), align='CENTER')
+# 0.001 + 0.734 x
+
+        # modelspace.add_line((0, 0), (10, 0), dxfattribs={'color': 7})
+        # drawing.layers.new('TEXTLAYER', dxfattribs={'color': 2})
+        # modelspace.add_text('Test', dxfattribs={'layer': 'TEXTLAYER'}).set_pos((0, 0.2), align='CENTER')
+        drawing.saveas(filename)
