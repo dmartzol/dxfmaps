@@ -128,12 +128,8 @@ class Map(object):
     def to_dxf(self, filename='out.dxf'):
         drawing = ezdxf.new('R2000')
         modelspace = drawing.modelspace()
-        drawing.layers.new('BOUNDARIES_LAYER', dxfattribs={'color': 255})
-        heigth = scale_adjust(3.0)
-        modelspace.add_text('Test', dxfattribs={'layer': 'TEXTLAYER', 'height': heigth, 'style': 'standard'}).set_pos((0, 0), align='CENTER')
-# 0.001 + 0.734 x
-
-        # modelspace.add_line((0, 0), (10, 0), dxfattribs={'color': 7})
-        # drawing.layers.new('TEXTLAYER', dxfattribs={'color': 2})
-        # modelspace.add_text('Test', dxfattribs={'layer': 'TEXTLAYER'}).set_pos((0, 0.2), align='CENTER')
+        for polygon in self.polygons:
+            vertices = list(polygon.exterior.coords)
+            modelspace.add_lwpolyline(vertices)
+        # heigth = scale_adjust(3.0)
         drawing.saveas(filename)
