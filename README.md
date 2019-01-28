@@ -6,10 +6,10 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 
 ## Features
 
-- [ ] Convenient SVG and <del>DXF</del> formats to import into CNC software for processing and cut.
-- [ ] Specify the desired width of the final SVG/DXF.
-- [x] Generate a vector map of all countries in a continent by just specifying the name of the continent.
-- [x] Generate a map reducing the number of points in it by simplifying polygons.
+- [X] Convenient SVG and DXF formats to import into CNC software for processing and cut.
+- [X] Specify the desired width of the final SVG/DXF.
+- [X] Generate a vector map of all countries in a continent by just specifying the name of the continent.
+- [X] Generate a map reducing the number of points in it by simplifying polygons.
 - [ ] Generate a map of all the provinces/states in a country specifying the name of the country.
 
 ## Installation
@@ -27,6 +27,7 @@ pip install -e .
 
 * [pyshp](https://github.com/GeospatialPython/pyshp) - Library for reading ESRI Shapefiles
 * [Shapely](https://github.com/Toblerity/Shapely) - Manipulation and analysis of geometric objects
+* [ezdxf](https://github.com/mozman/ezdxf) - Creation and manipulation of DXF drawings
 
 ## Usage and examples
 ```python
@@ -45,10 +46,11 @@ if __name__ == '__main__':
 ```
 
 ## TO DO
-- [ ] Implement actual DXF format(Curently only SVG is supported).
+
+- [ ] Fix scale
+- [ ] Include shapefile reader into the module
 - [ ] Implement different projections.
-- [ ] Credit Natural Earth data.
-- [ ] SVG to DXF
+- [ ] Implement imperial units.
 - [ ] Add credits(Natural Earth logo, etc)
 - [ ] Add support for other sources(.gov)
 

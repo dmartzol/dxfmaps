@@ -40,8 +40,8 @@ def project(geodataframe):
     return geodataframe.to_crs({'init': 'epsg:3395'})
     # return geodataframe.to_crs(epsg=54019)
 
-def save_svg(full_map, filename='out.svg', stroke_width=1.0, size=500, units="px"):
-    size_and_units = "{}{}".format(str(size), units)
+def save_svg(full_map, filename='out.svg', stroke_width=1.0, width=500, units="px"):
+    size_and_units = "{}{}".format(str(width), units)
     poligon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
     file = open(filename, 'w')
     svg_style = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n"

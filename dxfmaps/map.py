@@ -16,7 +16,7 @@ class Map(object):
         self.country = country
         self.polygons = self.shapefile2polygons()
         self.full_map = None
-        self.size = None
+        self.width = None
         self.units = None
         self.factor = None
     
@@ -96,12 +96,12 @@ class Map(object):
         offset_y = - min(self.full_map.bounds[1], self.full_map.bounds[3])
         self.full_map = shapely.affinity.translate(self.full_map, xoff=offset_x, yoff=offset_y)
 
-    def scale(self, size=200, units="mm"):
-        # Scaling the map to reduce its size
-        self.size = size
+    def scale(self, width=200, units="mm"):
+        # Scaling the map to reduce its width
+        self.width = width
         self.units = units
-        self.factor = (3.77 * self.size) / max(self.full_map.bounds)
-        # print("")
+        assert units == "mm", "Other units not implemented yet"
+        self.factor = (3.77 * self.width) / max(self.full_map.bounds)
         # print("Scaling factor: {}".format(self.factor))
         # print("Old bounds: {}".format(self.full_map.bounds))
         self.full_map = shapely.affinity.scale(self.full_map, xfact=self.factor, yfact=self.factor, origin=(0, 0))
@@ -111,7 +111,7 @@ class Map(object):
         save_svg(
             self.full_map,
             filename=filename,
-            size=self.size,
+            width=self.width,
             units=self.units,
             stroke_width=stroke_width
         )
@@ -121,7 +121,7 @@ class Map(object):
             save_svg(
                 interior,
                 filename='buffered.svg',
-                size=self.size,
+                width=self.width,
                 units=self.units,
                 stroke_width=stroke_width
             )

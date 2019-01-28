@@ -6,7 +6,8 @@ import sys
 
 VERBOSE = False
 
-# TODO - Implement DXF output
+# TODO - Fix scale
+# TODO - Include shapefile reader into the module
 # TODO - Change projections
 # TODO - Implement printing country names
 # TODO - Change name of output buffered file
@@ -20,7 +21,7 @@ def main():
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale()
+    map.scale(width=500, units='mm')
     map.to_svg(filename='europe.svg')
     map.to_dxf()
 
