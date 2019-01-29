@@ -46,7 +46,7 @@ class Map(object):
             geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
             assert len(geoms)>0, "Countries not found"
         return shapely.geometry.MultiPolygon(geoms)
-    
+
     def build_polygon(self, shapeRecord):
         """
         If object is a Polygon, returns the object unmodified.
@@ -59,7 +59,7 @@ class Map(object):
             return self.max_area_polygon(geom)
         else:
             raise Exception('Found non valid geometry')
-    
+
     def max_area_polygon(self, multipolygon):
         # TODO: Try using max and its index
         # index, value = max(list(multipolygon), key=lambda item: item.area)
@@ -68,7 +68,7 @@ class Map(object):
             if polygon.area > p.area:
                 p = polygon
         return p
-    
+
     def filter_by_area(self, area_thresold):
         """
         Goes through all the polygons inside self.multipolygon and keeps only polygons with
@@ -78,7 +78,7 @@ class Map(object):
         polygons = [polygon for polygon in self.multipolygon.geoms if polygon.area > area_thresold]
         self.multipolygon = shapely.geometry.MultiPolygon(polygons)
         assert len(polygons) > 0, "We removed too many polygons"
-    
+
     def simplify(self, tolerance = 2000, verbose = False):
         """
         Removes nodes from the path of every polygon according to tolerance
@@ -106,22 +106,27 @@ class Map(object):
 
     def translate_to_center(self):
         # Translating the map to the origin
-        full_map = shapely.geometry.MultiPolygon(self.polygons)
-        offset_x = - min(full_map.bounds[0], full_map.bounds[2])
-        offset_y = - min(full_map.bounds[1], full_map.bounds[3])
-        full_map = shapely.affinity.translate(full_map, xoff=offset_x, yoff=offset_y)
-        for i, polygon in enumerate(full_map.geoms):
-            self.polygons[i] = polygon
+        offset_x = - min(self.multipolygon.bounds[0], self.multipolygon.bounds[2])
+        offset_y = - min(self.multipolygon.bounds[1], self.multipolygon.bounds[3])
+        self.multipolygon = shapely.affinity.translate(self.multipolygon, xoff=offset_x, yoff=offset_y)
 
     def scale(self, width=200, units="mm"):
-        # Scaling the map to reduce its width
+        """
+        Scales the map to a specific width or heigh
+        """
         self.width = width
         self.units = units
-        assert units == "mm", "Other units not implemented yet"
-        self.factor = (3.77 * self.width) / max(self.full_map.bounds)
+        current_width = self.multipolygon.bounds[2]
+        current_height = self.multipolygon.bounds[3]
+        assert units == "mm", "Other units not implemented yet(only mm)"
+        self.factor = (0.666 * self.width) / max(self.multipolygon.bounds)
+        print(self.factor)
+        print(max(self.multipolygon.bounds))
+        print(self.multipolygon.bounds)
         # print("Scaling factor: {}".format(self.factor))
         # print("Old bounds: {}".format(self.full_map.bounds))
-        self.full_map = shapely.affinity.scale(self.full_map, xfact=self.factor, yfact=self.factor, origin=(0, 0))
+        self.multipolygon = shapely.affinity.scale(self.multipolygon, xfact=self.factor, yfact=self.factor, origin=(0, 0))
+        print(max(self.multipolygon.bounds))
         # print("New bounds: {}".format(self.full_map.bounds))
 
     def to_svg(self, filename='out.svg', stroke_width=.5, save_back_buffered=False):
@@ -147,7 +152,7 @@ class Map(object):
         drawing = ezdxf.new('R2000')
         modelspace = drawing.modelspace()
 
-        for polygon in self.polygons:
+        for polygon in self.multipolygon.geoms:
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
         # heigth = scale_adjust(3.0)
