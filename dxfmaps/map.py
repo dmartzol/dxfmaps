@@ -147,16 +147,16 @@ class Map(object):
             origin=(0, 0)
         )
 
-    def to_svg(self, filename='out.svg', stroke_width=.5, save_back_buffered=False):
+    def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(
-            self.polygons,
+            self.multipolygon,
             filename=filename,
             width=self.width,
             units=self.units,
             stroke_width=stroke_width
         )
         if save_back_buffered:
-            interior = self.full_map.buffer(0.5, cap_style=2, join_style=1)
+            interior = self.multipolygon.buffer(0.5, cap_style=2, join_style=1)
             interior = interior.buffer(-1.0, cap_style=2, join_style=1)
             save_svg(
                 interior,

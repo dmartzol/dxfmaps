@@ -14,7 +14,7 @@ def main():
     map.simplify(tolerance=.05)
     map.translate_to_center()
     map.scale_width(width=325, units='mm')
-    # map.to_svg(filename='europe.svg')
+    map.to_svg(filename='europe.svg')
     map.to_dxf()
 
 if __name__ == "__main__":
