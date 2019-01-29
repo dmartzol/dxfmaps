@@ -14,13 +14,12 @@ class Map(object):
         self.sf = sf
         self.continent = continent
         self.country = country
-        self.polygons = self.shapefile2polygons()
-        self.full_map = None
+        self.multipolygon = self.shp_to_multipolygon()
         self.width = None
         self.units = None
         self.factor = None
     
-    def shapefile2polygons(self):
+    def shp_to_multipolygon(self):
         if self.country and self.continent:
             geoms = []
             for shapeRecord in self.sf.shapeRecords():
@@ -46,9 +45,13 @@ class Map(object):
         else:
             geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
             assert len(geoms)>0, "Countries not found"
-        return geoms
+        return shapely.geometry.MultiPolygon(geoms)
     
     def build_polygon(self, shapeRecord):
+        """
+        If object is a Polygon, returns the object unmodified.
+        If object is a Multipolygon, returns the inner polygon with max area
+        """
         geom = shape(shapeRecord.shape.__geo_interface__)
         if isinstance(geom, shapely.geometry.polygon.Polygon):
             return geom
@@ -67,15 +70,23 @@ class Map(object):
         return p
     
     def filter_by_area(self, area_thresold):
+        """
+        Goes through all the polygons inside self.multipolygon and keeps only polygons with
+        area greater than area_thresold.
+        """
         # TODO: Figure units for area!
-        self.polygons = [polygon for polygon in self.polygons if polygon.area > area_thresold]
-        assert len(self.polygons) > 0, "We removed too many polygons"
+        polygons = [polygon for polygon in self.multipolygon.geoms if polygon.area > area_thresold]
+        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
+        assert len(polygons) > 0, "We removed too many polygons"
     
     def simplify(self, tolerance = 2000, verbose = False):
-        # TODO: calculate adequate tolerance
-        for i, polygon in enumerate(self.polygons):
+        """
+        Removes nodes from the path of every polygon according to tolerance
+        """
+        polygons = [polygon for polygon in self.multipolygon.geoms]
+        for i, polygon in enumerate(polygons):
             nodes_before = len(list(polygon.exterior.coords))
-            self.polygons[i] = self.polygons[i].simplify(tolerance=tolerance)
+            polygons[i] = polygons[i].simplify(tolerance=tolerance)
             if verbose:
                 nodes = len(list(polygon.exterior.coords))
                 print("Polygon nodes reduced by {:.1f}%, from {} to {}".format(
@@ -84,6 +95,7 @@ class Map(object):
                     nodes
                     )
                 )
+        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
 
     def translate_to_center_old(self):
         # Translating the map to the origin

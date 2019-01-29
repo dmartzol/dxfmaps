@@ -56,6 +56,9 @@ if __name__ == '__main__':
 - [ ] Add credits(Natural Earth logo, etc)
 - [ ] Add support for other sources(.gov)
 - [ ] Add country names
+- [ ] Replace asserts for exceptions/errors
+- [ ] Calculate adequate tolerance for method 'simplify'
+
 
 
 ## License
