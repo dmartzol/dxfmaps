@@ -1,27 +1,19 @@
-# from dxfmaps.utils import *
-from dxfmaps import Map
 import dxfmaps
 import shapefile
 import sys
 
 VERBOSE = False
 
-# TODO - Fix scale
-# TODO - Include shapefile reader into the module
-# TODO - Change projections
-# TODO - Implement printing country names
-# TODO - Change name of output buffered file
-
 WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
 WORLD_PROVINCES = '/shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp'
 
 def main():
     sf = shapefile.Reader(WORLD_COUNTRIES)
-    map = Map(sf, continent='europe')
+    map = dxfmaps.Map(sf, continent='europe')
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale(width=500, units='mm')
+    map.scale(width=300, units='mm')
     map.to_svg(filename='europe.svg')
     map.to_dxf()
 

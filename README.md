@@ -49,10 +49,14 @@ if __name__ == '__main__':
 
 - [ ] Fix scale
 - [ ] Include shapefile reader into the module
+- [ ] Change name of output buffered file
+- [ ] Implemente verbose mode (correctly)
 - [ ] Implement different projections.
 - [ ] Implement imperial units.
 - [ ] Add credits(Natural Earth logo, etc)
 - [ ] Add support for other sources(.gov)
+- [ ] Add country names
+
 
 ## License
 

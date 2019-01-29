@@ -71,9 +71,6 @@ class Map(object):
         self.polygons = [polygon for polygon in self.polygons if polygon.area > area_thresold]
         assert len(self.polygons) > 0, "We removed too many polygons"
     
-    def full_map(self):
-        return shapely.geometry.MultiPolygon(polygons)
-    
     def simplify(self, tolerance = 2000, verbose = False):
         # TODO: calculate adequate tolerance
         for i, polygon in enumerate(self.polygons):
@@ -88,13 +85,21 @@ class Map(object):
                     )
                 )
 
-    def translate_to_center(self):
+    def translate_to_center_old(self):
         # Translating the map to the origin
-        # TODO - Choose a better name
         self.full_map = shapely.geometry.MultiPolygon(self.polygons)
         offset_x = - min(self.full_map.bounds[0], self.full_map.bounds[2])
         offset_y = - min(self.full_map.bounds[1], self.full_map.bounds[3])
         self.full_map = shapely.affinity.translate(self.full_map, xoff=offset_x, yoff=offset_y)
+
+    def translate_to_center(self):
+        # Translating the map to the origin
+        full_map = shapely.geometry.MultiPolygon(self.polygons)
+        offset_x = - min(full_map.bounds[0], full_map.bounds[2])
+        offset_y = - min(full_map.bounds[1], full_map.bounds[3])
+        full_map = shapely.affinity.translate(full_map, xoff=offset_x, yoff=offset_y)
+        for i, polygon in enumerate(full_map.geoms):
+            self.polygons[i] = polygon
 
     def scale(self, width=200, units="mm"):
         # Scaling the map to reduce its width
@@ -109,7 +114,7 @@ class Map(object):
 
     def to_svg(self, filename='out.svg', stroke_width=.5, save_back_buffered=False):
         save_svg(
-            self.full_map,
+            self.polygons,
             filename=filename,
             width=self.width,
             units=self.units,
@@ -125,9 +130,11 @@ class Map(object):
                 units=self.units,
                 stroke_width=stroke_width
             )
+
     def to_dxf(self, filename='out.dxf'):
         drawing = ezdxf.new('R2000')
         modelspace = drawing.modelspace()
+
         for polygon in self.polygons:
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
