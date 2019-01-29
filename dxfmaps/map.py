@@ -16,8 +16,9 @@ class Map(object):
         self.country = country
         self.multipolygon = self.shp_to_multipolygon()
         self.width = None
+        self.height = None
         self.units = None
-        self.factor = None
+        self.scaling_factor = None
     
     def shp_to_multipolygon(self):
         if self.country and self.continent:
@@ -108,26 +109,43 @@ class Map(object):
         # Translating the map to the origin
         offset_x = - min(self.multipolygon.bounds[0], self.multipolygon.bounds[2])
         offset_y = - min(self.multipolygon.bounds[1], self.multipolygon.bounds[3])
-        self.multipolygon = shapely.affinity.translate(self.multipolygon, xoff=offset_x, yoff=offset_y)
+        self.multipolygon = shapely.affinity.translate(
+            self.multipolygon,
+            xoff=offset_x,
+            yoff=offset_y
+        )
 
-    def scale(self, width=200, units="mm"):
+    def scale_width(self, width=200, units="mm"):
         """
-        Scales the map to a specific width or heigh
+        Scales the map to a specific width
         """
         self.width = width
         self.units = units
         current_width = self.multipolygon.bounds[2]
+        assert units == "mm", "Other units not implemented yet(only mm)"
+        self.scaling_factor = self.width / current_width
+        self.multipolygon = shapely.affinity.scale(
+            self.multipolygon,
+            xfact=self.scaling_factor,
+            yfact=self.scaling_factor,
+            origin=(0, 0)
+        )
+
+    def scale_height(self, height=100, units="mm"):
+        """
+        Scales the map to a specific heigh
+        """
+        self.height = height
+        self.units = units
         current_height = self.multipolygon.bounds[3]
         assert units == "mm", "Other units not implemented yet(only mm)"
-        self.factor = (0.666 * self.width) / max(self.multipolygon.bounds)
-        print(self.factor)
-        print(max(self.multipolygon.bounds))
-        print(self.multipolygon.bounds)
-        # print("Scaling factor: {}".format(self.factor))
-        # print("Old bounds: {}".format(self.full_map.bounds))
-        self.multipolygon = shapely.affinity.scale(self.multipolygon, xfact=self.factor, yfact=self.factor, origin=(0, 0))
-        print(max(self.multipolygon.bounds))
-        # print("New bounds: {}".format(self.full_map.bounds))
+        self.scaling_factor = self.height / current_height
+        self.multipolygon = shapely.affinity.scale(
+            self.multipolygon,
+            xfact=self.scaling_factor,
+            yfact=self.scaling_factor,
+            origin=(0, 0)
+        )
 
     def to_svg(self, filename='out.svg', stroke_width=.5, save_back_buffered=False):
         save_svg(

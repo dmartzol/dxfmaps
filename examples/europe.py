@@ -13,7 +13,7 @@ def main():
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale(width=300, units='mm')
+    map.scale_width(width=325, units='mm')
     # map.to_svg(filename='europe.svg')
     map.to_dxf()
 
