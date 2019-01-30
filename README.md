@@ -34,11 +34,12 @@ pip install -e .
 import dxfmaps
 
 def main():
-    map = dxfmaps.Map('shapefile.shp', continent='europe')
+    sf = shapefile.Reader(WORLD_COUNTRIES)
+    map = dxfmaps.Map(sf, continent='europe')
     map.filter_by_area(area_thresold = .5)
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale()
+    map.scale_width(width=200, units="mm")
     map.to_svg()
 
 if __name__ == '__main__':
