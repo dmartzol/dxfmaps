@@ -47,16 +47,16 @@ if __name__ == '__main__':
 
 ## TO DO
 
-- [ ] Fix scale
 - [ ] Include shapefile reader into the module
+- [ ] Implement buffered as method
 - [ ] Change name of output buffered file
-- [ ] Implemente verbose mode (correctly)
 - [ ] Implement different projections.
+- [ ] Replace asserts for exceptions/errors
+- [ ] Add country names
+- [ ] Implement verbose mode (correctly)
 - [ ] Implement imperial units.
 - [ ] Add credits(Natural Earth logo, etc)
 - [ ] Add support for other sources(.gov)
-- [ ] Add country names
-- [ ] Replace asserts for exceptions/errors
 - [ ] Calculate adequate tolerance for method 'simplify'
 
 
