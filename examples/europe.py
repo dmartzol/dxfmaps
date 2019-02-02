@@ -1,19 +1,18 @@
 import dxfmaps
 import shapefile
 import sys
+from dxfmaps.projections import mercator
 
 VERBOSE = False
 
-WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
-WORLD_PROVINCES = '/shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp'
-
 def main():
-    sf = shapefile.Reader(WORLD_COUNTRIES)
-    map = dxfmaps.Map(sf, continent='europe')
+    sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
+    map = dxfmaps.Map(sf, continent="europe")
     map.filter_by_area(area_thresold = .5)
+    map.project('mercator')
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale_width(width=325, units='mm')
+    map.scale_width()
     map.to_svg(filename='europe.svg')
     map.to_dxf()
 

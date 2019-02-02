@@ -1,5 +1,8 @@
 import shapely
 
+WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
+WORLD_PROVINCES = '/shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp'
+
 def scale_adjust(n):
     return -1.3624*(0.001 - n)
 

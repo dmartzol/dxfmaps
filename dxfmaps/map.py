@@ -2,6 +2,7 @@ import shapely
 import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
+from dxfmaps.projections import mercator
 
 class LandNotFound(ValueError):
     pass
@@ -69,6 +70,22 @@ class Map(object):
             if polygon.area > p.area:
                 p = polygon
         return p
+
+    def project(self, projection_name):
+        """
+        Transforms the current GPS coordinates to the chosen projection
+        coordinates.
+        """
+        new_polygons = []
+        if projection_name == 'mercator':
+            for polygon in self.multipolygon.geoms:
+                new_coords = []
+                for coords in polygon.exterior.coords:
+                    x, y = mercator(*coords)
+                    new_coords.append([x, y])
+                new_polygons.append(shapely.geometry.Polygon(new_coords))
+        self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
+        
 
     def filter_by_area(self, area_thresold):
         """
