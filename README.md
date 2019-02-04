@@ -50,9 +50,10 @@ if __name__ == '__main__':
 
 ## TO DO
 
-- [ ] Implement different projections
+- [X] Implement Azimuthal and Winkel Triple projections
 - [ ] Include shapefile reader into the module
 - [ ] Implement scale as ratio for Azimuthal equidistant projection
+- [ ] Comment code
 - [ ] Implement buffered as method
 - [ ] Change name of output buffered file
 - [ ] Replace asserts for exceptions/errors
@@ -62,7 +63,6 @@ if __name__ == '__main__':
 - [ ] Add credits(Natural Earth logo, etc)
 - [ ] Add support for other sources(.gov)
 - [ ] Calculate adequate tolerance for method 'simplify'
-
 
 
 ## License

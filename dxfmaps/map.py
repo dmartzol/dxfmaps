@@ -2,7 +2,7 @@ import shapely
 import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
-from dxfmaps.projections import mercator
+from dxfmaps.projections import mercator, winkel_tripel, laea
 
 class LandNotFound(ValueError):
     pass
@@ -84,8 +84,24 @@ class Map(object):
                     x, y = mercator(*coords)
                     new_coords.append([x, y])
                 new_polygons.append(shapely.geometry.Polygon(new_coords))
+        if projection_name == 'winkel_tripel':
+            for polygon in self.multipolygon.geoms:
+                new_coords = []
+                for coords in polygon.exterior.coords:
+                    x, y = winkel_tripel(*coords)
+                    new_coords.append([x, y])
+                new_polygons.append(shapely.geometry.Polygon(new_coords))
+        if projection_name == 'laea':
+            for polygon in self.multipolygon.geoms:
+                new_coords = []
+                for coords in polygon.exterior.coords:
+                    x, y = laea(*coords)
+                    new_coords.append([x, y])
+                new_polygons.append(shapely.geometry.Polygon(new_coords))
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
-        
+    
+    def projection_function(self, function_name):
+
 
     def filter_by_area(self, area_thresold):
         """
