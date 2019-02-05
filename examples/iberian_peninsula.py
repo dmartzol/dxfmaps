@@ -15,6 +15,7 @@ def main():
     map.translate_to_center()
     map.scale_width()
     map.to_svg(filename='iberian.svg')
+    map.buffer()
 
 if __name__ == "__main__":
     main()
