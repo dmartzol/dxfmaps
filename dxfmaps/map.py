@@ -11,25 +11,26 @@ class CountryNotInContinentException(Exception):
     pass
 
 class Map(object):
-    def __init__(self, sf, continent=None, country=None):
+    def __init__(self, sf, continent=None, countries=None):
         self.sf = sf
         self.continent = continent
-        self.country = country
+        self.countries = countries
         self.multipolygon = self.shp_to_multipolygon()
         self.width = None
         self.height = None
         self.units = None
         self.scaling_factor = None
+        self.buffered = None
     
     def shp_to_multipolygon(self):
-        if self.country and self.continent:
+        if self.countries and self.continent:
+            raise ValueError("Only one filter is needed.")
+        if self.countries:
             geoms = []
-            for shapeRecord in self.sf.shapeRecords():
-                if shapeRecord.record["NAME"].lower() == self.country.lower():
-                    if shapeRecord.record["CONTINENT"].lower() != self.continent.lower():
-                        error_message = '{} is not in {} according to Shapefile'.format(self.country, self.continent)
-                        raise CountryNotInContinentException(error_message)
-                    geoms.append(self.build_polygon(shapeRecord))
+            for country in self.countries:
+                for shapeRecord in self.sf.shapeRecords():
+                    if shapeRecord.record["NAME"].lower() == country.lower():
+                        geoms.append(self.build_polygon(shapeRecord))
         elif self.continent:
             geoms = []
             for shapeRecord in self.sf.shapeRecords():
@@ -37,13 +38,6 @@ class Map(object):
                     geoms.append(self.build_polygon(shapeRecord))
             if len(geoms) == 0:
                 raise LandNotFound(self.continent)
-        elif self.country:
-            geoms = []
-            for shapeRecord in self.sf.shapeRecords():
-                if shapeRecord.record["NAME"].lower() == self.country.lower():
-                    geoms.append(self.build_polygon(shapeRecord))
-            if len(geoms) == 0:
-                raise LandNotFound(self.country)
         else:
             geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
             assert len(geoms)>0, "Countries not found"
@@ -166,6 +160,10 @@ class Map(object):
             origin=(0, 0)
         )
 
+    def buffer(self):
+        interior = self.multipolygon.buffer(0.5, cap_style=2, join_style=1)
+        self.buffered = interior.buffer(-1.0, cap_style=2, join_style=1)
+
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(
             self.multipolygon,
@@ -188,7 +186,6 @@ class Map(object):
     def to_dxf(self, filename='out.dxf'):
         drawing = ezdxf.new('R2000')
         modelspace = drawing.modelspace()
-
         for polygon in self.multipolygon.geoms:
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
