@@ -50,14 +50,14 @@ if __name__ == '__main__':
 
 ## TO DO
 
-- [X] Implement Azimuthal and Winkel Triple projections
-- [ ] Include shapefile reader into the module
-- [ ] Implement scale as ratio for Azimuthal equidistant projection
-- [ ] Comment code
+- [X] Implement Azimuthal and Winkel Triple and Mercator projections
 - [ ] Implement buffered as method
 - [ ] Change name of output buffered file
-- [ ] Replace asserts for exceptions/errors
 - [ ] Add country names
+- [ ] Comment code
+- [ ] Include shapefile reader into the module
+- [ ] Implement scale as ratio for Azimuthal equidistant projection
+- [ ] Replace asserts for exceptions/errors
 - [ ] Implement verbose mode (correctly)
 - [ ] Implement imperial units.
 - [ ] Add credits(Natural Earth logo, etc)
