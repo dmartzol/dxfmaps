@@ -2,7 +2,7 @@ import shapely
 import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
-from dxfmaps.projections import mercator, winkel_tripel, laea
+import dxfmaps.projections
 
 class LandNotFound(ValueError):
     pass
@@ -63,7 +63,7 @@ class Map(object):
             raise Exception('Found non valid geometry')
 
     def max_area_polygon(self, multipolygon):
-        # TODO: Try using max and its index
+        # TODO: Try using max and its index, e.g.
         # index, value = max(list(multipolygon), key=lambda item: item.area)
         p = list(multipolygon)[0]
         for polygon in list(multipolygon):
@@ -76,37 +76,23 @@ class Map(object):
         Transforms the current GPS coordinates to the chosen projection
         coordinates.
         """
+        # print(dir(dxfmaps.projections))
+        # projection_names = {"laea", "mercator", "winkel_tripel"}
+        if projection_name not in dir(dxfmaps.projections):
+            raise ValueError("Wrong projection name")
         new_polygons = []
-        if projection_name == 'mercator':
-            for polygon in self.multipolygon.geoms:
-                new_coords = []
-                for coords in polygon.exterior.coords:
-                    x, y = mercator(*coords)
-                    new_coords.append([x, y])
-                new_polygons.append(shapely.geometry.Polygon(new_coords))
-        if projection_name == 'winkel_tripel':
-            for polygon in self.multipolygon.geoms:
-                new_coords = []
-                for coords in polygon.exterior.coords:
-                    x, y = winkel_tripel(*coords)
-                    new_coords.append([x, y])
-                new_polygons.append(shapely.geometry.Polygon(new_coords))
-        if projection_name == 'laea':
-            for polygon in self.multipolygon.geoms:
-                new_coords = []
-                for coords in polygon.exterior.coords:
-                    x, y = laea(*coords)
-                    new_coords.append([x, y])
-                new_polygons.append(shapely.geometry.Polygon(new_coords))
+        for polygon in self.multipolygon.geoms:
+            new_coords = []
+            for coords in polygon.exterior.coords:
+                x, y = getattr(dxfmaps.projections, projection_name)(*coords)
+                new_coords.append([x, y])
+            new_polygons.append(shapely.geometry.Polygon(new_coords))
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
-    
-    def projection_function(self, function_name):
-
 
     def filter_by_area(self, area_thresold):
         """
-        Goes through all the polygons inside self.multipolygon and keeps only polygons with
-        area greater than area_thresold.
+        Goes through all the polygons inside self.multipolygon and keeps only
+        polygons with area greater than area_thresold.
         """
         # TODO: Figure units for area!
         polygons = [polygon for polygon in self.multipolygon.geoms if polygon.area > area_thresold]

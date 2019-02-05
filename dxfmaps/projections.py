@@ -50,7 +50,7 @@ def sinc(x):
     else:
         return math.sin(x) / x
     
-def laea(lon, lat, lon0=0, lat0=0):
+def LambertAzimuthalEqualArea(lon, lat, lon0=0, lat0=0):
     lon, lat = radians(lon), radians(lat)
     lon0, lat0 = radians(lon0), radians(lat0)
     k = sqrt(2 / (1 + sin(lat0)*sin(lat) + cos(lat0)*cos(lat)*cos(lon-lon0)))
