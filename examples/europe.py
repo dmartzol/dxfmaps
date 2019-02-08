@@ -12,9 +12,9 @@ def main():
     map.project('mercator')
     map.simplify(tolerance=.05)
     map.translate_to_center()
-    map.scale_width()
+    map.scale_to_width()
     map.to_svg(filename='europe.svg')
-    map.to_dxf()
+    map.to_dxf(filename='europe.dxf')
 
 if __name__ == "__main__":
     main()

@@ -13,9 +13,12 @@ def main():
     map.project('LambertAzimuthalEqualArea')
     map.simplify(tolerance=.0002)
     map.translate_to_center()
-    map.scale_width()
+    map.scale_to_width()
     map.to_svg(filename='iberian.svg')
+    map.to_dxf(filename='iberian.dxf')
     map.buffer()
+    map.to_svg(filename='iberian0.svg')
+    map.to_dxf(filename='iberian0.dxf')
 
 if __name__ == "__main__":
     main()

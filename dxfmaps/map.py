@@ -20,7 +20,6 @@ class Map(object):
         self.height = None
         self.units = None
         self.scaling_factor = None
-        self.buffered = None
     
     def shp_to_multipolygon(self):
         if self.countries and self.continent:
@@ -111,15 +110,10 @@ class Map(object):
                 )
         self.multipolygon = shapely.geometry.MultiPolygon(polygons)
 
-    def translate_to_center_old(self):
-        # Translating the map to the origin
-        self.full_map = shapely.geometry.MultiPolygon(self.polygons)
-        offset_x = - min(self.full_map.bounds[0], self.full_map.bounds[2])
-        offset_y = - min(self.full_map.bounds[1], self.full_map.bounds[3])
-        self.full_map = shapely.affinity.translate(self.full_map, xoff=offset_x, yoff=offset_y)
-
     def translate_to_center(self):
-        # Translating the map to the origin
+        """
+        Translates the map to the origin (0, 0)
+        """
         offset_x = - min(self.multipolygon.bounds[0], self.multipolygon.bounds[2])
         offset_y = - min(self.multipolygon.bounds[1], self.multipolygon.bounds[3])
         self.multipolygon = shapely.affinity.translate(
@@ -128,7 +122,7 @@ class Map(object):
             yoff=offset_y
         )
 
-    def scale_width(self, width=200, units="mm"):
+    def scale_to_width(self, width=200, units="mm"):
         """
         Scales the map to a specific width
         """
@@ -144,7 +138,7 @@ class Map(object):
             origin=(0, 0)
         )
 
-    def scale_height(self, height=100, units="mm"):
+    def scale_to_height(self, height=100, units="mm"):
         """
         Scales the map to a specific heigh
         """
@@ -160,9 +154,9 @@ class Map(object):
             origin=(0, 0)
         )
 
-    def buffer(self):
-        interior = self.multipolygon.buffer(0.5, cap_style=2, join_style=1)
-        self.buffered = interior.buffer(-1.0, cap_style=2, join_style=1)
+    def buffer(self, buffer_grow=0.5, buffer_shrink=-1.0):
+        interior = self.multipolygon.buffer(buffer_grow, cap_style=2, join_style=1)
+        self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(
@@ -186,7 +180,12 @@ class Map(object):
     def to_dxf(self, filename='out.dxf'):
         drawing = ezdxf.new('R2000')
         modelspace = drawing.modelspace()
-        for polygon in self.multipolygon.geoms:
+        if isinstance(self.multipolygon, shapely.geometry.MultiPolygon):
+            for polygon in self.multipolygon.geoms:
+                vertices = list(polygon.exterior.coords)
+                modelspace.add_lwpolyline(vertices)
+        elif isinstance(self.multipolygon, shapely.geometry.Polygon):
+            polygon = self.multipolygon
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
         # heigth = scale_adjust(3.0)

@@ -50,19 +50,18 @@ if __name__ == '__main__':
 
 ## TO DO
 
-- [X] Implement Azimuthal and Winkel Triple and Mercator projections
-- [ ] Implement buffered as method
-- [ ] Change name of output buffered file
-- [ ] Add country names
-- [ ] Comment code
-- [ ] Include shapefile reader into the module
-- [ ] Implement scale as ratio for Azimuthal equidistant projection
-- [ ] Replace asserts for exceptions/errors
-- [ ] Implement verbose mode (correctly)
-- [ ] Implement imperial units.
-- [ ] Add credits(Natural Earth logo, etc)
-- [ ] Add support for other sources(.gov)
-- [ ] Calculate adequate tolerance for method 'simplify'
+- [X] Implement Azimuthal and Winkel Triple and Mercator projections.
+- [X] Implement smaller buffered map for back support.
+- [ ] Add country names.
+- [ ] Comment code.
+- [ ] Include shapefile reader into the module.
+- [ ] Implement scale as ratio for Azimuthal equidistant projection.
+- [ ] Replace asserts for exceptions/errors (correctly).
+- [ ] Implement verbose mode (correctly).
+- [ ] Implement imperial units?
+- [ ] Add credits(Natural Earth logo, etc).
+- [ ] Add support for other data sources(.gov)
+- [ ] Calculate adequate tolerance for method 'simplify'.
 
 
 ## License
