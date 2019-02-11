@@ -16,7 +16,7 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 
 Install with:
 
-```
+```Bash
 git clone https://github.com/dmartzol/dxfmaps.git
 cd dxfmaps
 pip install -e .
@@ -30,7 +30,8 @@ pip install -e .
 * [ezdxf](https://github.com/mozman/ezdxf) - Creation and manipulation of DXF drawings
 
 ## Usage and examples
-```python
+
+```Python
 import dxfmaps
 
 def main():

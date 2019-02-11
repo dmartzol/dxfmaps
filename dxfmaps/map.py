@@ -4,11 +4,14 @@ from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
 import dxfmaps.projections
 
+
 class LandNotFound(ValueError):
     pass
 
+
 class CountryNotInContinentException(Exception):
     pass
+
 
 class Map(object):
     def __init__(self, sf, continent=None, countries=None):
@@ -20,7 +23,7 @@ class Map(object):
         self.height = None
         self.units = None
         self.scaling_factor = None
-    
+
     def shp_to_multipolygon(self):
         if self.countries and self.continent:
             raise ValueError("Only one filter is needed.")
@@ -39,7 +42,7 @@ class Map(object):
                 raise LandNotFound(self.continent)
         else:
             geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
-            assert len(geoms)>0, "Countries not found"
+            assert len(geoms) > 0, "Countries not found"
         return shapely.geometry.MultiPolygon(geoms)
 
     def build_polygon(self, shapeRecord):
@@ -92,7 +95,7 @@ class Map(object):
         self.multipolygon = shapely.geometry.MultiPolygon(polygons)
         assert len(polygons) > 0, "We removed too many polygons"
 
-    def simplify(self, tolerance = 2000, verbose = False):
+    def simplify(self, tolerance=2000, verbose=False):
         """
         Removes nodes from the path of every polygon according to tolerance
         """
