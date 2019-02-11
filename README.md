@@ -54,6 +54,7 @@ if __name__ == '__main__':
 - [X] Implement Azimuthal and Winkel Triple and Mercator projections.
 - [X] Implement smaller buffered map for back support.
 - [ ] Add country names.
+- [ ] Try preserve_topology=False in simplify func
 - [ ] Comment code.
 - [ ] Include shapefile reader into the module.
 - [ ] Implement scale as ratio for Azimuthal equidistant projection.
