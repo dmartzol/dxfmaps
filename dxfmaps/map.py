@@ -62,7 +62,7 @@ class Map(object):
         # TODO: Try using max and its index, e.g.
         # index, value = max(list(multipolygon), key=lambda item: item.area)
         p = list(multipolygon)[0]
-        for polygon in list(multipolygon):
+        for polygon in multipolygon.geoms:
             if polygon.area > p.area:
                 p = polygon
         return p
@@ -160,6 +160,23 @@ class Map(object):
     def buffer(self, buffer_grow=0.5, buffer_shrink=-1.0):
         interior = self.multipolygon.buffer(buffer_grow, cap_style=2, join_style=1)
         self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
+
+    def add_names(self):
+        self.names_areas()
+
+    def names_areas(self):
+        p = 0.6
+        polygons = []
+        increment = -1.0
+        for polygon in self.multipolygon:
+            cen = polygon.buffer(increment, 1)
+            while p*polygon.area < cen.area:
+                increment += increment
+                cen = cen.buffer(increment, 1)
+            # cen = polygon.representative_point().buffer(2.0, 1)
+            # cen = polygon.buffer(-1.0, 1)
+            polygons.extend([polygon, cen])
+        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(
