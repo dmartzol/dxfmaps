@@ -1,4 +1,5 @@
 import shapely
+from operator import attrgetter
 import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
@@ -59,13 +60,10 @@ class Map(object):
             raise Exception('Found non valid geometry')
 
     def max_area_polygon(self, multipolygon):
-        # TODO: Try using max and its index, e.g.
-        # index, value = max(list(multipolygon), key=lambda item: item.area)
-        p = list(multipolygon)[0]
-        for polygon in multipolygon.geoms:
-            if polygon.area > p.area:
-                p = polygon
-        return p
+        """
+        Returns the polygon with greatest area inside a multipolygon
+        """
+        return max(multipolygon, key=attrgetter('area'))
 
     def project(self, projection_name):
         """
@@ -165,17 +163,26 @@ class Map(object):
         self.names_areas()
 
     def names_areas(self):
-        p = 0.6
+        p = 0.02
         polygons = []
-        increment = -1.0
+        increment = -.50
         for polygon in self.multipolygon:
             cen = polygon.buffer(increment, 1)
-            while p*polygon.area < cen.area:
-                increment += increment
+            print("Polygon is valid: {}".format(cen.is_valid))
+            while True:
+                if isinstance(cen, shapely.geometry.MultiPolygon):
+                    cen = self.max_area_polygon(cen)
+                if polygon.contains(cen.minimum_rotated_rectangle):
+                    print("Square break")
+                    break
+                if p * polygon.area > cen.area:
+                    print("Area break")
+                    break
                 cen = cen.buffer(increment, 1)
+
             # cen = polygon.representative_point().buffer(2.0, 1)
             # cen = polygon.buffer(-1.0, 1)
-            polygons.extend([polygon, cen])
+            polygons.extend([polygon, cen.minimum_rotated_rectangle])
         self.multipolygon = shapely.geometry.MultiPolygon(polygons)
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):

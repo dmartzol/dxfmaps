@@ -8,7 +8,7 @@ VERBOSE = False
 
 def main():
     sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    map = dxfmaps.Map(sf, countries=['spain', 'norway'])
+    map = dxfmaps.Map(sf, countries=['norway', 'spain'])
     map.filter_by_area(area_thresold=.5)
     map.project('mercator')
     map.simplify(tolerance=.005)
