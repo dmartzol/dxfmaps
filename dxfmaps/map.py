@@ -4,6 +4,7 @@ import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import save_svg, scale_adjust
 import dxfmaps.projections
+import time
 
 
 class LandNotFound(ValueError):
@@ -63,6 +64,7 @@ class Map(object):
         """
         Returns the polygon with greatest area inside a multipolygon
         """
+        # TODO - Try without using attrgetter
         return max(multipolygon, key=attrgetter('area'))
 
     def project(self, projection_name):
@@ -160,30 +162,31 @@ class Map(object):
         self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
 
     def add_names(self):
-        self.names_areas()
+        polygons = list(self.multipolygon)
+        start = time.time()
+        polygons.extend(self.text_containers())
+        end = time.time()
+        print("It took {0:.2f} seconds".format(end-start))
+        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
 
-    def names_areas(self):
+    def text_containers(self):
         p = 0.02
-        polygons = []
-        increment = -.50
+        containers = []
+        increment = -.010
         for polygon in self.multipolygon:
-            cen = polygon.buffer(increment, 1)
-            print("Polygon is valid: {}".format(cen.is_valid))
+            buffered = polygon.buffer(increment, 1)
             while True:
-                if isinstance(cen, shapely.geometry.MultiPolygon):
-                    cen = self.max_area_polygon(cen)
-                if polygon.contains(cen.minimum_rotated_rectangle):
+                if isinstance(buffered, shapely.geometry.MultiPolygon):
+                    buffered = self.max_area_polygon(buffered)
+                if polygon.contains(buffered.minimum_rotated_rectangle):
                     print("Square break")
                     break
-                if p * polygon.area > cen.area:
+                if p * polygon.area > buffered.area:
                     print("Area break")
                     break
-                cen = cen.buffer(increment, 1)
-
-            # cen = polygon.representative_point().buffer(2.0, 1)
-            # cen = polygon.buffer(-1.0, 1)
-            polygons.extend([polygon, cen.minimum_rotated_rectangle])
-        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
+                buffered = buffered.buffer(increment, 1)
+            containers.append(buffered.minimum_rotated_rectangle)
+        return containers
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(

@@ -57,6 +57,7 @@ if __name__ == '__main__':
 - [ ] Try preserve_topology=False in simplify func
 - [ ] Comment code.
 - [ ] Include shapefile reader into the module.
+- [ ] Implement PNG support.
 - [ ] Implement scale as ratio for Azimuthal equidistant projection.
 - [ ] Replace asserts for exceptions/errors (correctly).
 - [ ] Implement verbose mode (correctly).
