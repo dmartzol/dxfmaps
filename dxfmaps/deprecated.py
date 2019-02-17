@@ -7,8 +7,9 @@ def shapefile2polygons(sf, continent=None, min_area=None):
         for shapeRecord in sf.shapeRecords():
             if shapeRecord.record["CONTINENT"] == continent:
                 geoms.append(build_polygon(shapeRecord))
-    assert len(geoms)>0, "Countries not found"
+    assert len(geoms) > 0, "Countries not found"
     return geoms
+
 
 def build_polygon(shapeRecord):
     geom = shape(shapeRecord.shape.__geo_interface__)
@@ -19,6 +20,7 @@ def build_polygon(shapeRecord):
     else:
         raise Exception('Found non valid geometry')
 
+
 def max_area_polygon(multipolygon):
     # TODO: Try using max and its index
     # index, value = max(list(multipolygon), key=lambda item: item.area)
@@ -28,14 +30,17 @@ def max_area_polygon(multipolygon):
             p = polygon
     return p
 
-def filter_by_area(polygons, area_thresold = 1000000000):
+
+def filter_by_area(polygons, area_thresold=1000000000):
     # TODO: Figure units for area!
     return [polygon for polygon in polygons if polygon.area > area_thresold]
+
 
 def fetch(list_of_names):
     ox.config(use_cache=True)
     geodataframe = ox.gdf_from_places(list_of_names)
     return geodataframe
+
 
 def shapefile2polygons_old2(self):
         if self.continent is None:
@@ -45,14 +50,17 @@ def shapefile2polygons_old2(self):
             for shapeRecord in self.sf.shapeRecords():
                 if shapeRecord.record["CONTINENT"] == self.continent:
                     geoms.append(self.build_polygon(shapeRecord))
-        assert len(geoms)>0, "Countries not found"
+        assert len(geoms) > 0, "Countries not found"
         return geoms
+
 
 def shapefile2polygons_old(sf):
     return [shape(x.shape.__geo_interface__) for x in sf.shapeRecords()]
 
+
 def proj(geodataframe):
     return ox.project_gdf(geodataframe)
+
 
 def dataframe2polygons(geodataframe):
     polygons = []

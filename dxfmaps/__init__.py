@@ -4,6 +4,5 @@ from .utils import (
     list_of_continents,
     item_info,
     countries_by_continent,
-    project,
     save_svg,
 )

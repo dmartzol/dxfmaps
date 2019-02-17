@@ -1,10 +1,15 @@
 import shapely
-from operator import attrgetter
 import ezdxf
 from shapely.geometry import shape
-from dxfmaps.utils import save_svg, scale_adjust
+from dxfmaps.utils import (
+    greatest_contained_rectangle,
+    inner_rectangle,
+    max_area_polygon,
+    multipolygon_to_polygon,
+    save_svg,
+    scale_adjust,
+)
 import dxfmaps.projections
-import time
 
 
 class LandNotFound(ValueError):
@@ -34,7 +39,8 @@ class Map(object):
             for country in self.countries:
                 for shapeRecord in self.sf.shapeRecords():
                     if shapeRecord.record["NAME"].lower() == country.lower():
-                        geoms.append(self.build_polygon(shapeRecord))
+                        geom = shape(shapeRecord.shape.__geo_interface__)
+                        geoms.append(multipolygon_to_polygon(geom))
         elif self.continent:
             geoms = []
             for shapeRecord in self.sf.shapeRecords():
@@ -47,33 +53,15 @@ class Map(object):
             assert len(geoms) > 0, "Countries not found"
         return shapely.geometry.MultiPolygon(geoms)
 
-    def build_polygon(self, shapeRecord):
-        """
-        If object is a Polygon, returns the object unmodified.
-        If object is a Multipolygon, returns the inner polygon with max area
-        """
-        geom = shape(shapeRecord.shape.__geo_interface__)
-        if isinstance(geom, shapely.geometry.polygon.Polygon):
-            return geom
-        elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
-            return self.max_area_polygon(geom)
-        else:
-            raise Exception('Found non valid geometry')
-
-    def max_area_polygon(self, multipolygon):
-        """
-        Returns the polygon with greatest area inside a multipolygon
-        """
-        # TODO - Try without using attrgetter
-        return max(multipolygon, key=attrgetter('area'))
-
     def project(self, projection_name):
         """
         Transforms the current GPS coordinates to the chosen projection
         coordinates.
+        Available projections:
+        -laea
+        -mercator
+        -winkel_tripel
         """
-        # print(dir(dxfmaps.projections))
-        # projection_names = {"laea", "mercator", "winkel_tripel"}
         if projection_name not in dir(dxfmaps.projections):
             raise ValueError("Wrong projection name")
         new_polygons = []
@@ -87,7 +75,7 @@ class Map(object):
 
     def filter_by_area(self, area_thresold):
         """
-        Goes through all the polygons inside self.multipolygon and keeps only
+        Goes through all the polygons in self.multipolygon and keeps only
         polygons with area greater than area_thresold.
         """
         # TODO: Figure units for area!
@@ -162,31 +150,11 @@ class Map(object):
         self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
 
     def add_names(self):
-        polygons = list(self.multipolygon)
-        start = time.time()
-        polygons.extend(self.text_containers())
-        end = time.time()
-        print("It took {0:.2f} seconds".format(end-start))
-        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
-
-    def text_containers(self):
-        p = 0.02
-        containers = []
-        increment = -.010
+        new_polygons = []
         for polygon in self.multipolygon:
-            buffered = polygon.buffer(increment, 1)
-            while True:
-                if isinstance(buffered, shapely.geometry.MultiPolygon):
-                    buffered = self.max_area_polygon(buffered)
-                if polygon.contains(buffered.minimum_rotated_rectangle):
-                    print("Square break")
-                    break
-                if p * polygon.area > buffered.area:
-                    print("Area break")
-                    break
-                buffered = buffered.buffer(increment, 1)
-            containers.append(buffered.minimum_rotated_rectangle)
-        return containers
+            rect = inner_rectangle(polygon)
+            new_polygons.extend([polygon, rect])
+        self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
         save_svg(
