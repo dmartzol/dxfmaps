@@ -2,6 +2,8 @@ import shapely
 import ezdxf
 from shapely.geometry import shape
 from dxfmaps.utils import (
+    angle_of_rotated_rectangle,
+    centroid_as_polygon,
     greatest_contained_rectangle,
     inner_rectangle,
     max_area_polygon,
@@ -150,10 +152,15 @@ class Map(object):
         self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
 
     def add_names(self):
+        """
+        Use before scaling
+        """
         new_polygons = []
         for polygon in self.multipolygon:
             rect = inner_rectangle(polygon)
-            new_polygons.extend([polygon, rect])
+            print(angle_of_rotated_rectangle(rect))
+            centroid = centroid_as_polygon(rect)
+            new_polygons.extend([polygon, rect, centroid])
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
 
     def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):

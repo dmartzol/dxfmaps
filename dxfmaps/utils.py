@@ -2,6 +2,7 @@ import shapely
 import time
 import random
 from operator import attrgetter
+import math
 
 WORLD_COUNTRIES = "../shapefiles/ne_10m_admin_0_countries/ne_10m_admin_0_countries.shp"
 WORLD_PROVINCES = '/shapefiles/ne_10m_admin_1_states_provinces/ne_10m_admin_1_states_provinces.shp'
@@ -70,19 +71,39 @@ def centroid_as_polygon(polygon, p=0.1):
     return polygon.centroid.buffer(c)
 
 
+def freetype_nodes():
+    """
+    https://stackoverflow.com/questions/12061882/render-vector-letter-in-python
+    """
+
+
+def angle_of_rotated_rectangle(rectangle):
+    """
+    Returns the angle of a rotated rectangle.
+    """
+    x0, y0 = rectangle.exterior.coords[0]
+    x1, y1 = rectangle.exterior.coords[1]
+    angle = math.atan2(y1-y0, x1-x0)
+    return angle
+
+
+def dimensions_of_rotated_rectangle(rectangle):
+    c0, c1, c2 = rectangle.exterior.coords[:3]
+    width = distance(c0, c1)
+    height = distance(c1, c2)
+
+
 def inner_rectangle(polygon):
     """
     Returns a shapely box contained in a given polygon.
     """
     p = 0.02
     increment = polygon.area * -0.006
-    print(increment)
     buffered = polygon.buffer(increment, 1)
     while True:
         if isinstance(buffered, shapely.geometry.MultiPolygon):
             buffered = max_area_polygon(buffered)
         if polygon.contains(buffered.minimum_rotated_rectangle):
-            print("Square break")
             break
         if p * polygon.area > buffered.area:
             print("Area break")
@@ -92,6 +113,9 @@ def inner_rectangle(polygon):
 
 
 def scale_adjust(n):
+    """
+    Adjusting scale of text in a DXF layer
+    """
     return -1.3624*(0.001 - n)
 
 

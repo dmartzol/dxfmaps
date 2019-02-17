@@ -8,15 +8,25 @@ VERBOSE = False
 
 def main():
     sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    map = dxfmaps.Map(sf, countries=['norway', 'spain'])
+    list_of_countries = [
+        'norway',
+        # 'spain',
+        # 'france',
+        # 'italy',
+        # 'germany',
+        # 'Denmark',
+        # 'Poland',
+        # 'sweden'
+    ]
+    map = dxfmaps.Map(sf, countries=list_of_countries)
     map.filter_by_area(area_thresold=.5)
     map.project('mercator')
-    map.simplify(tolerance=.005)
+    map.simplify(tolerance=.015)
     map.add_names()
     map.translate_to_center()
     map.scale_to_width()
-    map.to_svg(filename='norway.svg')
-    map.to_dxf(filename='norway.dxf')
+    map.to_svg(filename='countries.svg')
+    map.to_dxf(filename='countries.dxf')
     # print(map.multipolygon.centroid)
 
 if __name__ == "__main__":
