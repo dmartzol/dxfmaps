@@ -153,12 +153,13 @@ class Map(object):
 
     def add_names(self):
         """
-        Use before scaling
+        Processes the name for every country/province and includes it into
+        self.multipolygon as a polygon.
         """
         new_polygons = []
         for polygon in self.multipolygon:
             rect = inner_rectangle(polygon)
-            print(angle_of_rotated_rectangle(rect))
+            # print(angle_of_rotated_rectangle(rect))
             centroid = centroid_as_polygon(rect)
             new_polygons.extend([polygon, rect, centroid])
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
