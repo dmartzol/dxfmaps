@@ -1,4 +1,3 @@
--e git+git@github.com:dmartzol/dxfmaps.git@9361a97c87a2c5dde3cdc25e13e708dee1e59d02#egg=dxfmaps
 ezdxf==0.9
 pyparsing==2.3.1
 pyshp==2.0.1

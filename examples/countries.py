@@ -19,7 +19,7 @@ def main():
         'sweden'
     ]
     map = dxfmaps.Map(sf, countries=list_of_countries)
-    map.filter_by_area(area_thresold=.5)
+    map.filter_by_area(area_limit=.5)
     map.project('mercator')
     map.simplify(tolerance=.015)
     map.translate_to_center()

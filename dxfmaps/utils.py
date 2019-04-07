@@ -30,6 +30,27 @@ def greatest_contained_rectangle(polygon, points_count=20):
     return polygon
 
 
+def inner_rectangle(polygon):
+    """Returns a shapely box contained in a given polygon.
+
+    This is not the largest contained box, but it is a relatively large box
+    that is guaranteed to be contained in the given polygon. This is faster
+    than finding the largest contained box.
+    """
+    p = 0.02
+    increment = reduction_increment(polygon)
+    buffered = polygon.buffer(increment, 1)
+    while True:
+        if isinstance(buffered, shapely.geometry.MultiPolygon):
+            buffered = max_area_polygon(buffered)
+        if polygon.contains(buffered.minimum_rotated_rectangle):
+            break
+        if p * polygon.area > buffered.area:
+            print("Area break")
+            break
+        buffered = buffered.buffer(increment, 1)
+    return buffered.minimum_rotated_rectangle
+
 def random_point_in(polygon):
     """
     Returns a random point inside the given polygon
@@ -63,15 +84,15 @@ def multipolygon_to_polygon(geometry):
         raise Exception('Non valid geometry')
 
 
-def centroid_as_polygon(polygon, relative_size=0.05):
+def centroid_as_polygon(rectangle, relative_size=0.05):
     """
-    Returns a round "small" shapely.polygon that represents the centroid of the
-    given polygon. The size of the returned polygon is given relatively to the
-    longest side of polygon.
+    Returns a round shapely.polygon that represents the centroid of the
+    given rectangle. The size of the returned circle is proportional to
+    the longest side of the rectangle.
     """
-    w, h = size_of_rotated_rectangle(polygon)
+    w, h = size_of_rotated_rectangle(rectangle)
     c = max(h, w) * relative_size
-    return polygon.centroid.buffer(c)
+    return rectangle.centroid.buffer(c)
 
 
 def freetype_nodes():
@@ -80,7 +101,7 @@ def freetype_nodes():
     """
 
 
-def angle_of_rotated_rectangle(rectangle):
+def rectangle_angle(rectangle):
     """
     Returns the angle of a rotated rectangle.
     """
@@ -119,28 +140,6 @@ def reduction_increment(polygon, ratio=0.01):
     w, h = size_of_rotated_rectangle(polygon.minimum_rotated_rectangle)
     increment = max(h, w) * -ratio
     return increment
-
-
-def inner_rectangle(polygon):
-    """
-    Returns a shapely box contained in a given polygon.
-    This is not the largest contained box, but it is a relatively large box
-    that is guaranteed to be contained in the given polygon. This is faster
-    than finding the largest contained box.
-    """
-    p = 0.02
-    increment = reduction_increment(polygon)
-    buffered = polygon.buffer(increment, 1)
-    while True:
-        if isinstance(buffered, shapely.geometry.MultiPolygon):
-            buffered = max_area_polygon(buffered)
-        if polygon.contains(buffered.minimum_rotated_rectangle):
-            break
-        if p * polygon.area > buffered.area:
-            print("Area break")
-            break
-        buffered = buffered.buffer(increment, 1)
-    return buffered.minimum_rotated_rectangle
 
 
 def scale_adjust(n):

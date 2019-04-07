@@ -9,7 +9,7 @@ VERBOSE = False
 def main():
     sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
     map = dxfmaps.Map(sf, continent="europe")
-    map.filter_by_area(area_thresold=.5)
+    map.filter_by_area(area_limit=.5)
     map.project('mercator')
     map.simplify(tolerance=.05)
     map.translate_to_center()

@@ -1,17 +1,10 @@
 import shapely
 import ezdxf
 from shapely.geometry import shape
-from dxfmaps.utils import (
-    angle_of_rotated_rectangle,
-    centroid_as_polygon,
-    greatest_contained_rectangle,
-    inner_rectangle,
-    max_area_polygon,
-    multipolygon_to_polygon,
-    save_svg,
-    scale_adjust,
-)
-import dxfmaps.projections
+from dxfmaps import utils
+from dxfmaps import projections
+from dxfmaps import fonts
+from dxfmaps import text
 
 
 class LandNotFound(ValueError):
@@ -22,7 +15,7 @@ class CountryNotInContinentException(Exception):
     pass
 
 
-class Map(object):
+class Map:
     def __init__(self, sf, continent=None, countries=None):
         self.sf = sf
         self.continent = continent
@@ -42,16 +35,17 @@ class Map(object):
                 for shapeRecord in self.sf.shapeRecords():
                     if shapeRecord.record["NAME"].lower() == country.lower():
                         geom = shape(shapeRecord.shape.__geo_interface__)
-                        geoms.append(multipolygon_to_polygon(geom))
+                        geoms.append(utils.multipolygon_to_polygon(geom))
         elif self.continent:
             geoms = []
             for shapeRecord in self.sf.shapeRecords():
-                if shapeRecord.record["CONTINENT"].lower() == self.continent.lower():
+                cont_in_records = shapeRecord.record["CONTINENT"].lower()
+                if cont_in_records == self.continent.lower():
                     geoms.append(self.build_polygon(shapeRecord))
             if len(geoms) == 0:
                 raise LandNotFound(self.continent)
         else:
-            geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
+            geoms = [self.build_polygon(x) for x in self.sf.shapeRecords()]
             assert len(geoms) > 0, "Countries not found"
         return shapely.geometry.MultiPolygon(geoms)
 
@@ -64,24 +58,24 @@ class Map(object):
         -mercator
         -winkel_tripel
         """
-        if projection_name not in dir(dxfmaps.projections):
+        if projection_name not in dir(projections):
             raise ValueError("Wrong projection name")
         new_polygons = []
         for polygon in self.multipolygon.geoms:
             new_coords = []
             for coords in polygon.exterior.coords:
-                x, y = getattr(dxfmaps.projections, projection_name)(*coords)
+                x, y = getattr(projections, projection_name)(*coords)
                 new_coords.append([x, y])
             new_polygons.append(shapely.geometry.Polygon(new_coords))
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
 
-    def filter_by_area(self, area_thresold):
+    def filter_by_area(self, area_limit):
         """
         Goes through all the polygons in self.multipolygon and keeps only
-        polygons with area greater than area_thresold.
+        polygons with area greater than area_limit.
         """
         # TODO: Figure units for area!
-        polygons = [polygon for polygon in self.multipolygon.geoms if polygon.area > area_thresold]
+        polygons = [x for x in self.multipolygon.geoms if x.area > area_limit]
         self.multipolygon = shapely.geometry.MultiPolygon(polygons)
         assert len(polygons) > 0, "We removed too many polygons"
 
@@ -107,12 +101,13 @@ class Map(object):
         """
         Translates the map to the origin (0, 0)
         """
-        offset_x = - min(self.multipolygon.bounds[0], self.multipolygon.bounds[2])
-        offset_y = - min(self.multipolygon.bounds[1], self.multipolygon.bounds[3])
+        x0, y0, x1, y1 = self.multipolygon.bounds
+        x_offset = - min(x0, x1)
+        y_offset = - min(y0, y1)
         self.multipolygon = shapely.affinity.translate(
             self.multipolygon,
-            xoff=offset_x,
-            yoff=offset_y
+            xoff=x_offset,
+            yoff=y_offset
         )
 
     def scale_to_width(self, width=200, units="mm"):
@@ -147,9 +142,9 @@ class Map(object):
             origin=(0, 0)
         )
 
-    def buffer(self, buffer_grow=0.5, buffer_shrink=-1.0):
-        interior = self.multipolygon.buffer(buffer_grow, cap_style=2, join_style=1)
-        self.multipolygon = interior.buffer(buffer_shrink, cap_style=2, join_style=1)
+    def buffer(self, grow=0.5, shrink=-1.0):
+        interior = self.multipolygon.buffer(grow, cap_style=2, join_style=1)
+        self.multipolygon = interior.buffer(shrink, cap_style=2, join_style=1)
 
     def add_names(self):
         """
@@ -157,25 +152,23 @@ class Map(object):
         self.multipolygon as a polygon.
         """
         new_polygons = []
-        for polygon in self.multipolygon:
-            rect = inner_rectangle(polygon)
-            # print(angle_of_rotated_rectangle(rect))
-            centroid = centroid_as_polygon(rect)
-            new_polygons.extend([polygon, rect, centroid])
+        for polygon, name in zip(self.multipolygon, self.countries):
+            label = text.label(polygon, name)
+            new_polygons.extend([polygon, *label])
         self.multipolygon = shapely.geometry.MultiPolygon(new_polygons)
 
-    def to_svg(self, filename='out.svg', stroke_width=.2, save_back_buffered=False):
-        save_svg(
+    def to_svg(self, filename='out.svg', stroke_width=.2, back_buffered=False):
+        utils.save_svg(
             self.multipolygon,
             filename=filename,
             width=self.width,
             units=self.units,
             stroke_width=stroke_width
         )
-        if save_back_buffered:
+        if back_buffered:
             interior = self.multipolygon.buffer(0.5, cap_style=2, join_style=1)
             interior = interior.buffer(-1.0, cap_style=2, join_style=1)
-            save_svg(
+            utils.save_svg(
                 interior,
                 filename='buffered.svg',
                 width=self.width,
@@ -194,5 +187,5 @@ class Map(object):
             polygon = self.multipolygon
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
-        # heigth = scale_adjust(3.0)
+        # heigth = utils.scale_adjust(3.0)
         drawing.saveas(filename)
