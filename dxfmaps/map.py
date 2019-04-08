@@ -101,9 +101,9 @@ class Map:
         """
         Translates the map to the origin (0, 0)
         """
-        x0, y0, x1, y1 = self.multipolygon.bounds
-        x_offset = - min(x0, x1)
-        y_offset = - min(y0, y1)
+        minx, miny, maxx, maxy = self.multipolygon.bounds
+        x_offset = - min(minx, maxx)
+        y_offset = - min(miny, maxy)
         self.multipolygon = shapely.affinity.translate(
             self.multipolygon,
             xoff=x_offset,

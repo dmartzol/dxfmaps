@@ -15,7 +15,7 @@ def main():
     map.translate_to_center()
     map.scale_to_width()
     map.add_names()
-    map.to_svg(filename='france.svg')
+    map.to_svg(filename='france.svg', stroke_width=2.0)
     map.to_dxf(filename='france.dxf')
     map.buffer()
     map.to_svg(filename='france0.svg')
