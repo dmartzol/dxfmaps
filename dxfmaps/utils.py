@@ -5,7 +5,8 @@ from operator import attrgetter
 import math
 
 WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
-WORLD_PROVINCES = '/shpf/10m-1-states-provinces/ne_10m_admin_1_states_provinces.shp'
+WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
+                   "ne_10m_admin_1_states_provinces.shp")
 
 
 def greatest_contained_rectangle(polygon, points_count=20):
@@ -50,6 +51,7 @@ def inner_rectangle(polygon):
             break
         buffered = buffered.buffer(increment, 1)
     return buffered.minimum_rotated_rectangle
+
 
 def random_point_in(polygon):
     """
@@ -103,21 +105,57 @@ def freetype_nodes():
 
 def rectangle_angle(rectangle):
     """
-    Returns the angle of a rotated rectangle.
+    Returns the angle in radians of a rotated rectangle.
     """
     x0, y0 = rectangle.exterior.coords[0]
     x1, y1 = rectangle.exterior.coords[1]
     angle = math.atan2(y1-y0, x1-x0)
-    return angle
+    return math.degrees(angle)
 
 
-def distance(point0, point1):
+def distance(pointA, pointB):
     """
     Returns the distance between two points given as tuples
     """
-    x0, y0 = point0
-    x1, y1 = point1
+    x0, y0 = pointA
+    x1, y1 = pointB
     return math.hypot(x0-x1, y0-y1)
+
+
+def slope(point_A, point_B):
+    x0, y0 = point_A
+    x1, y1 = point_B
+    return (y1-y0)/(x1-x0)
+
+
+def slope_angle(slope):
+    """
+    Returns the angle(in degrees) of a line given its slope
+    """
+    return math.degrees(math.atan(slope))
+
+
+def line_angle(point_A, point_B):
+    """
+    Returns the angle(in degrees) of a line given 2 points from it
+    """
+    line_slope = slope(point_A, point_B)
+    angle = slope_angle(line_slope)
+    return angle
+
+
+def width_angle(rectangle):
+    """Returns the length and angle(in degrees) of the longest side of a
+    rotated rectangle
+    """
+    point_A, point_B, point_C = rectangle.exterior.coords[:3]
+    w = distance(point_A, point_B)
+    h = distance(point_B, point_C)
+    if w > h:
+        angle = line_angle(point_A, point_B)
+        return w, angle
+    angle = line_angle(point_B, point_C)
+    return h, angle
 
 
 def size_of_rotated_rectangle(rectangle):
