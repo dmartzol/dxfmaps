@@ -1,7 +1,8 @@
 import shapely
 import shapely.wkt
 from dxfmaps import utils
-from dxfmaps.fonts import *
+from .geometricfigure import GeometricFigure
+from .fonts import *
 
 
 def label(polygon, name, box=True, centroid=False):
@@ -13,37 +14,22 @@ def label(polygon, name, box=True, centroid=False):
     if centroid:
         polygons.append(cir_centroid)
     text = Text(name)
+    text.scale_to_width(200)
+    text.to_svg(filename='temp.svg')
     text.move_and_fit_box(inner_rectangle)
-    rendered_text = text.geometry
+    rendered_text = text.multipolygon
     polygons.extend(rendered_text)
     return polygons
 
 
-class Text:
-    def __init__(self, string, font=VERA):
+class Text(GeometricFigure):
+    def __init__(self, string, font=VERA, spacing=0):
         self.string = string
         self.font = font
-        self.geometry = self._build_multipolygon()
+        self.spacing = spacing
+        return super().__init__(self._as_multipolygon())
 
-    @property
-    def centroid(self):
-        return self.geometry.centroid
-
-    @property
-    def width(self):
-        minx, _, maxx, _ = self.bounds
-        return maxx - minx
-
-    @property
-    def height(self):
-        _, miny, _, maxy = self.bounds
-        return maxy - miny
-    
-    @property
-    def bounds(self):
-        return self.geometry.bounds
-
-    def _build_multipolygon(self, spacing=0):
+    def _as_multipolygon(self):
         string = self.string
         font = self.font
         polygons = []
@@ -54,7 +40,7 @@ class Text:
             geom = shapely.wkt.loads(font[char])
             minx, _, _, _ = geom.bounds
             if right_bounds:
-                x_offset = right_bounds[-1] - minx + spacing
+                x_offset = right_bounds[-1] - minx + self.spacing
                 geom = shapely.affinity.translate(geom, xoff=x_offset)
             _, _, maxx, _ = geom.bounds
             right_bounds.append(maxx)
@@ -63,8 +49,8 @@ class Text:
         return multipolygon
 
     def _scale(self, factor):
-        self.geometry = shapely.affinity.scale(
-            self.geometry,
+        self.multipolygon = shapely.affinity.scale(
+            self.multipolygon,
             xfact=factor,
             yfact=factor
         )
@@ -73,15 +59,15 @@ class Text:
         text_center = self.centroid
         x_offset = target.x - text_center.x
         y_offset = target.y - text_center.y
-        self.geometry = shapely.affinity.translate(
-            self.geometry,
+        self.multipolygon = shapely.affinity.translate(
+            self.multipolygon,
             xoff=x_offset,
             yoff=y_offset
         )
 
     def _rotate(self, angle):
-        self.geometry = shapely.affinity.rotate(
-            self.geometry,
+        self.multipolygon = shapely.affinity.rotate(
+            self.multipolygon,
             angle,
             use_radians=False
         )

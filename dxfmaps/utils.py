@@ -8,6 +8,8 @@ WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
 WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
                    "ne_10m_admin_1_states_provinces.shp")
 
+# TODO: Separate into geometry.py
+
 
 def greatest_contained_rectangle(polygon, points_count=20):
     """
@@ -102,7 +104,7 @@ def freetype_nodes():
     https://stackoverflow.com/questions/12061882/render-vector-letter-in-python
     """
 
-
+# TODO: Deprecated
 def rectangle_angle(rectangle):
     """
     Returns the angle in radians of a rotated rectangle.
@@ -180,7 +182,7 @@ def reduction_increment(polygon, ratio=0.01):
     return increment
 
 
-def scale_adjust(n):
+def scale_adjust(n):  # TODO: Deprecated
     """
     Adjusting scale of text in a DXF layer
     """
@@ -230,7 +232,7 @@ def countries_by_continent(sf, continent):
             print(item["NAME"], item.oid)
 
 
-def save_svg(full_map, filename='out.svg', stroke_width=1.0, width=500, units="px"):
+def save_svg(full_map, filename='out.svg', stroke_width=1.0, width=500, units="px"):  # TODO: Rename to ~geom2svg
     size_and_units = "{}{}".format(str(width), units)
     poligon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
     file = open(filename, 'w')
