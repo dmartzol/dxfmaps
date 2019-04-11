@@ -36,7 +36,7 @@ import dxfmaps
 
 def main():
     sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    map = dxfmaps.Map(sf, continent="europe")
+    map = dxfmaps.map.Map(sf, continent="europe")
     map.filter_by_area(area_thresold = .5)
     map.project('mercator')
     map.simplify(tolerance=.05)
@@ -53,18 +53,20 @@ if __name__ == '__main__':
 
 - [X] Implement Azimuthal and Winkel Triple and Mercator projections.
 - [X] Implement smaller buffered map for back support.
-- [ ] Add country names.
-- [ ] Try preserve_topology=False in simplify func
-- [ ] Comment code.
-- [ ] Include shapefile reader into the module.
+- [X] Add country names.
 - [ ] Implement PNG support.
-- [ ] Implement scale as ratio for Azimuthal equidistant projection.
-- [ ] Replace asserts for exceptions/errors (correctly).
-- [ ] Implement verbose mode (correctly).
-- [ ] Implement imperial units?
+- [ ] Implement maximum rectangle in polygon
+- [ ] Update this README.
+- [ ] Include shapefile reader into the module.
 - [ ] Add credits(Natural Earth logo, etc).
+- [ ] Replace asserts for exceptions/errors (correctly).
+- [ ] Comment code.
+- [ ] Implement scale as ratio for Azimuthal equidistant projection.
+- [ ] Implement verbose mode (correctly).
 - [ ] Add support for other data sources(.gov)
 - [ ] Calculate adequate tolerance for method 'simplify'.
+- [ ] Implement imperial units?
+- [ ] Try preserve_topology=False in simplify func
 
 
 ## License

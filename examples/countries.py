@@ -21,7 +21,7 @@ def main():
     map.filter_by_area(area_limit=.5)
     projection = 'winkel_tripel'
     map.project(projection)
-    # map.simplify(tolerance=.015)
+    map.simplify(tolerance=.015)
     map.translate_to_center()
     map.scale_to_width(200)
     map.add_names()

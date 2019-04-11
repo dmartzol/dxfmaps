@@ -15,14 +15,27 @@ class LandNotFound(ValueError):
 class Map(GeometricFigure):
     def __init__(self, sf, continent=None, countries=None):
         self.sf = sf
-        self.continent = continent
-        self.countries = countries
-        self.scaling_factor = None
-        return super().__init__(self.shp_to_multipolygon())
-
-    def shp_to_multipolygon(self):
-        if self.countries and self.continent:
+        if countries and continent:
             raise ValueError("Only one filter is needed.")
+        elif continent:
+            self.countries = self._get_countries_from(continent)
+        else:
+            self.countries = countries
+        self.scaling_factor = None
+        return super().__init__(self._shp_to_multipolygon())
+
+    def _get_countries_from(self, continent):
+        countries = []
+        for shapeRecord in self.sf.shapeRecords():
+            continent_in_record = shapeRecord.record["CONTINENT"].lower()
+            if continent_in_record == continent.lower():
+                country = shapeRecord.record["NAME"].lower()
+                countries.append(country)
+        if len(countries) == 0:
+            raise ValueError("No countries found for that continent")
+        return countries
+
+    def _shp_to_multipolygon(self):
         if self.countries:
             geoms = []
             for country in self.countries:
@@ -30,18 +43,9 @@ class Map(GeometricFigure):
                     if shapeRecord.record["NAME"].lower() == country.lower():
                         geom = shape(shapeRecord.shape.__geo_interface__)
                         geoms.append(utils.multipolygon_to_polygon(geom))
-        elif self.continent:
-            geoms = []
-            for shapeRecord in self.sf.shapeRecords():
-                cont_in_records = shapeRecord.record["CONTINENT"].lower()
-                if cont_in_records == self.continent.lower():
-                    geom = shape(shapeRecord.shape.__geo_interface__)
-                    geoms.append(utils.multipolygon_to_polygon(geom))
-            if len(geoms) == 0:
-                raise LandNotFound(self.continent)
         else:
             geoms = [self.build_polygon(x) for x in self.sf.shapeRecords()]
-            assert len(geoms) > 0, "Countries not found"
+        assert len(geoms) > 0, "Countries not found"
         return shapely.geometry.MultiPolygon(geoms)
 
     def project(self, projection_name):

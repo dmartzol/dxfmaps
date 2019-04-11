@@ -16,7 +16,7 @@ def main():
     map.scale_to_width(200)
     map.add_names()
     map.to_svg(filename='europe.svg')
-    map.to_dxf(filename='europe.dxf')
+    # map.to_dxf(filename='europe.dxf')
 
 if __name__ == "__main__":
     main()

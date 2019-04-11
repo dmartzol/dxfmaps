@@ -126,6 +126,8 @@ def distance(pointA, pointB):
 def slope(point_A, point_B):
     x0, y0 = point_A
     x1, y1 = point_B
+    if x0 == x1:
+        return None
     return (y1-y0)/(x1-x0)
 
 
@@ -133,6 +135,8 @@ def slope_angle(slope):
     """
     Returns the angle(in degrees) of a line given its slope
     """
+    if slope is None:
+        return 90
     return math.degrees(math.atan(slope))
 
 

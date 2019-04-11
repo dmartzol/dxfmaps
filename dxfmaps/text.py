@@ -36,7 +36,11 @@ class Text(GeometricFigure):
         right_bounds = []
         for char in string:
             if char not in font:
-                raise ValueError("Character {} not in {}".format(char, font))
+                msg = "Character {} not in font.({})".format(ord(char), string)
+                if right_bounds:
+                    right_bounds.append(right_bounds[-1])
+                print(msg)
+                continue
             geom = shapely.wkt.loads(font[char])
             minx, _, _, _ = geom.bounds
             if right_bounds:

@@ -52,7 +52,7 @@ class GeometricFigure:
         """
         Translates all the geometries to the origin (0, 0)
         """
-        minx, miny, maxx, maxy = self.multipolygon.bounds
+        minx, miny, maxx, maxy = self.bounds
         x_offset = - min(minx, maxx)
         y_offset = - min(miny, maxy)
         self.multipolygon = shapely.affinity.translate(
