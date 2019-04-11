@@ -1,7 +1,6 @@
 import dxfmaps
+from dxfmaps.map import Map
 import shapefile
-import sys
-from dxfmaps.projections import mercator
 
 VERBOSE = False
 
@@ -18,16 +17,16 @@ def main():
         'Poland',
         'sweden'
     ]
-    map = dxfmaps.Map(sf, countries=list_of_countries)
+    map = Map(sf, countries=list_of_countries)
     map.filter_by_area(area_limit=.5)
-    map.project('mercator')
-    map.simplify(tolerance=.015)
+    projection = 'winkel_tripel'
+    map.project(projection)
+    # map.simplify(tolerance=.015)
     map.translate_to_center()
-    map.scale_to_width()
+    map.scale_to_width(200)
     map.add_names()
-    map.to_svg(filename='countries.svg')
-    map.to_dxf(filename='countries.dxf')
-    # print(map.multipolygon.centroid)
+    map.to_svg(filename='countries-{}.svg'.format(projection))
+    # map.to_dxf(filename='countries.dxf')
 
 if __name__ == "__main__":
     main()

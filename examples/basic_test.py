@@ -1,12 +1,12 @@
 import dxfmaps
-import shapefile
 from dxfmaps.projections import mercator
 from dxfmaps.map import Map
+import shapefile
 
 
 def main():
     sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    countries = ['Spain']
+    countries = ['france']
     map = Map(sf, countries=countries)
     map.filter_by_area(area_limit=.5)
     map.project('LambertAzimuthalEqualArea')
