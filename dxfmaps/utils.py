@@ -74,7 +74,6 @@ def max_area_polygon(multipolygon):
     # TODO - Try without using attrgetter
     return max(multipolygon, key=attrgetter('area'))
 
-
 def multipolygon_to_polygon(geometry):
     """
     If object is a Polygon, returns the object unmodified.

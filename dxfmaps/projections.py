@@ -3,6 +3,7 @@ from math import sin, cos, tan, acos, pi, radians, log, sqrt
 
 EARTH_RADIUS = 6378137
 
+
 def azimuthal_equidistant_proj(self, lon, lat):
     """
     Transforms coordinates from GPS(WSG84) to Azimuthal (WIP)
@@ -11,7 +12,8 @@ def azimuthal_equidistant_proj(self, lon, lat):
     y = - lat * math.cos(lon)
     return x, y
 
-def mercator(lon, lat, RF = 1.0/1000000.0, lon0 = 0):
+
+def mercator(lon, lat, RF=1.0/1000000.0, lon0=0):
     """Returns Mercator cartesian coodinates from GPS coordinates
     lon -- GPS longitude coordinate given in degrees
     lat -- GPS latitude coordinate given in degrees
@@ -25,7 +27,8 @@ def mercator(lon, lat, RF = 1.0/1000000.0, lon0 = 0):
     y = R * log(tan(pi / 4.0 + lat / 2.0))
     return (x, y)
 
-def winkel_tripel(lon, lat, lon0 = 0):
+
+def winkel_tripel(lon, lat, lon0=0):
     """
     Returns Winkel Tripel coordinates from GPS coordinates
 
@@ -36,7 +39,7 @@ def winkel_tripel(lon, lat, lon0 = 0):
     RF - Representative Factor (scale)
     """
     lon, lat = radians(lon), radians(lat)
-    lon = lon - lon0 # centering the projection
+    lon = lon - lon0  # centering the projection
     alpha = acos(cos(lat) * cos(lon / 2.0))
     sin_alpha = sinc(alpha)
     phi1 = acos(2.0 / pi)
@@ -44,12 +47,14 @@ def winkel_tripel(lon, lat, lon0 = 0):
     y = 1 / 2.0 * (lat + sin(lat) / sin_alpha)
     return (x, y)
 
+
 def sinc(x):
     if x == 0:
         return 1
     else:
         return math.sin(x) / x
-    
+
+
 def LambertAzimuthalEqualArea(lon, lat, lon0=0, lat0=0):
     lon, lat = radians(lon), radians(lat)
     lon0, lat0 = radians(lon0), radians(lat0)

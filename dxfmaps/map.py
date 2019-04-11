@@ -35,7 +35,8 @@ class Map(GeometricFigure):
             for shapeRecord in self.sf.shapeRecords():
                 cont_in_records = shapeRecord.record["CONTINENT"].lower()
                 if cont_in_records == self.continent.lower():
-                    geoms.append(self.build_polygon(shapeRecord))
+                    geom = shape(shapeRecord.shape.__geo_interface__)
+                    geoms.append(utils.multipolygon_to_polygon(geom))
             if len(geoms) == 0:
                 raise LandNotFound(self.continent)
         else:
@@ -48,7 +49,7 @@ class Map(GeometricFigure):
         Transforms the current GPS coordinates to the chosen projection
         coordinates.
         Available projections:
-            - laea
+            - LambertAzimuthalEqualArea
             - mercator
             - winkel_tripel
         """

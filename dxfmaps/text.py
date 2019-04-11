@@ -5,7 +5,7 @@ from .geometricfigure import GeometricFigure
 from .fonts import *
 
 
-def label(polygon, name, box=True, centroid=False):
+def label(polygon, name, box=False, centroid=False, uppercase=True):
     polygons = []
     inner_rectangle = utils.inner_rectangle(polygon)
     cir_centroid = utils.centroid_as_polygon(inner_rectangle)
@@ -13,9 +13,9 @@ def label(polygon, name, box=True, centroid=False):
         polygons.append(inner_rectangle)
     if centroid:
         polygons.append(cir_centroid)
+    if uppercase:
+        name = name[0].upper() + name[1:]
     text = Text(name)
-    text.scale_to_width(200)
-    text.to_svg(filename='temp.svg')
     text.move_and_fit_box(inner_rectangle)
     rendered_text = text.multipolygon
     polygons.extend(rendered_text)
@@ -32,7 +32,7 @@ class Text(GeometricFigure):
     def _as_multipolygon(self):
         string = self.string
         font = self.font
-        polygons = []
+        geoms = []
         right_bounds = []
         for char in string:
             if char not in font:
@@ -44,8 +44,15 @@ class Text(GeometricFigure):
                 geom = shapely.affinity.translate(geom, xoff=x_offset)
             _, _, maxx, _ = geom.bounds
             right_bounds.append(maxx)
-            polygons.append(geom)
-        multipolygon = shapely.geometry.MultiPolygon(polygons)
+            geoms.append(geom)
+        polygons_list = []
+        for geom in geoms:
+            if isinstance(geom, shapely.geometry.MultiPolygon):
+                for polygon in geom:
+                    polygons_list.append(polygon)
+            elif isinstance(geom, shapely.geometry.Polygon):
+                polygons_list.append(geom)
+        multipolygon = shapely.geometry.MultiPolygon(polygons_list)
         return multipolygon
 
     def _scale(self, factor):
