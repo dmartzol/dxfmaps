@@ -21,11 +21,12 @@ def main():
     map.filter_by_area(area_limit=.5)
     projection = 'winkel_tripel'
     map.project(projection)
-    map.simplify(tolerance=.015)
+    # map.simplify(tolerance=.001)
     map.translate_to_center()
-    map.scale_to_width(200)
+    map.scale_to_width(1000)
     map.add_names()
-    map.to_svg(filename='countries-{}.svg'.format(projection))
+    map.to_png()
+    # map.to_svg(filename='countries-{}.svg'.format(projection))
     # map.to_dxf(filename='countries.dxf')
 
 if __name__ == "__main__":

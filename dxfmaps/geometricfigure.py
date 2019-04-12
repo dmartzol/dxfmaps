@@ -4,6 +4,7 @@ from dxfmaps import fonts
 import shapely
 from shapely.geometry import shape
 import ezdxf
+import cairocffi as cairo
 
 
 class GeometricFigure:
@@ -116,3 +117,27 @@ class GeometricFigure:
             vertices = list(polygon.exterior.coords)
             modelspace.add_lwpolyline(vertices)
         drawing.saveas(filename)
+
+    def to_png(self, filename='out.png', stroke_width=1.0):
+        height = int(self.height)
+        width = int(self.width)
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+        context = cairo.Context(surface)
+        context.set_line_cap(cairo.LINE_CAP_ROUND)
+        context.set_line_join(cairo.LINE_JOIN_ROUND)
+        context.set_line_width(stroke_width)
+        with context:
+            context.set_source_rgb(1, 1, 1)
+            context.paint()
+        # Cairo coordinate system is on the upper left corner, so
+        # we need to do a vertical flip first
+        multipolygon = utils.vertical_flip(self.multipolygon)
+        for polygon in multipolygon:
+            vertices = polygon.exterior.coords
+            x, y = vertices[0]
+            context.move_to(x, y)
+            for vertex in vertices:
+                x, y = vertex
+                context.line_to(x, y)
+        context.stroke()
+        surface.write_to_png(filename)

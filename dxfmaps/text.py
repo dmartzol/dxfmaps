@@ -23,7 +23,7 @@ def label(polygon, name, box=False, centroid=False, uppercase=True):
 
 
 class Text(GeometricFigure):
-    def __init__(self, string, font=VERA, spacing=0):
+    def __init__(self, string, font=VERA, spacing=100.0):
         self.string = string
         self.font = font
         self.spacing = spacing

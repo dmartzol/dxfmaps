@@ -55,6 +55,22 @@ def inner_rectangle(polygon):
     return buffered.minimum_rotated_rectangle
 
 
+def vertical_flip(geometry):
+    """
+    Return a vertical reflection/flip of geometry.
+
+    rtype: shapely.geometry.MultiPolygon
+    """
+    if not isinstance(geometry, shapely.geometry.MultiPolygon):
+        raise ValueError("Argument must be a multipolygon")
+    result = shapely.affinity.scale(
+        geometry,
+        xfact=1.0,
+        yfact=-1.0
+    )
+    return result
+
+
 def random_point_in(polygon):
     """
     Returns a random point inside the given polygon
