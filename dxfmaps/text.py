@@ -32,7 +32,8 @@ class Text(GeometricFigure):
     def _as_multipolygon(self):
         string = self.string
         font = self.font
-        geoms = []
+        # geoms = []
+        geoms = {}
         right_bounds = []
         for char in string:
             if char not in font:
@@ -48,23 +49,29 @@ class Text(GeometricFigure):
                 geom = shapely.affinity.translate(geom, xoff=x_offset)
             _, _, maxx, _ = geom.bounds
             right_bounds.append(maxx)
-            geoms.append(geom)
-        polygons_list = []
-        for geom in geoms:
-            if isinstance(geom, shapely.geometry.MultiPolygon):
-                for polygon in geom:
-                    polygons_list.append(polygon)
-            elif isinstance(geom, shapely.geometry.Polygon):
-                polygons_list.append(geom)
-        multipolygon = shapely.geometry.MultiPolygon(polygons_list)
-        return multipolygon
+            geoms[char] = utils.get_polygons(geom)
+        return geoms
 
-    def _scale(self, factor):
+    def _scale_old(self, factor):
         self.multipolygon = shapely.affinity.scale(
             self.multipolygon,
             xfact=factor,
             yfact=factor
         )
+
+    def _scale(self, factor):
+        new_dict = {}
+        for name, polygons in self.countries_by_name.items():
+            new_polygons = []
+            for polygon in polygons:
+                new_polygon = shapely.affinity.scale(
+                    polygon,
+                    xfact=factor,
+                    yfact=factor
+                )
+                new_polygons.append(polygon)
+            new_dict[name] = new_polygons
+        self.countries_by_name = new_dict
 
     def _translate_to(self, target):
         text_center = self.centroid

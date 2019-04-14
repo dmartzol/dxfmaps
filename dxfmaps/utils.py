@@ -90,15 +90,32 @@ def max_area_polygon(multipolygon):
     # TODO - Try without using attrgetter
     return max(multipolygon, key=attrgetter('area'))
 
+
 def multipolygon_to_polygon(geometry):
     """
     If object is a Polygon, returns the object unmodified.
-    If object is a Multipolygon, returns its biggest(in area) polygon
+    If object is a Multipolygon, returns its biggest(in area) polygon.
+    This means this function gives only 1 polygon for each country.
+    This will have to be fixed later.
     """
     if isinstance(geometry, shapely.geometry.polygon.Polygon):
         return geometry
     elif isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
         return max_area_polygon(geometry)
+    else:
+        raise Exception('Non valid geometry')
+
+
+def get_polygons(geometry):
+    """
+    If geometry is a polygon, returns a list with geometry as its
+    only element.
+    If geometry is a multipolygon, returns a list of its polygons.
+    """
+    if isinstance(geometry, shapely.geometry.polygon.Polygon):
+        return [geometry]
+    elif isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
+        return list(geometry)
     else:
         raise Exception('Non valid geometry')
 

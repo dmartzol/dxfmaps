@@ -8,10 +8,17 @@ import cairocffi as cairo
 
 
 class GeometricFigure:
-    def __init__(self, multipolygon):
-        self.multipolygon = multipolygon
+    def __init__(self, elements):
+        self.elements = elements
         self.units = "mm"
         self.scaling_factor = None
+
+    @property
+    def as_multipolygon(self):
+        all_polygons = []
+        for element in self.elements:
+            all_polygons.extend(element.as_polygons())
+        return shapely.geometry.MultiPolygon(all_polygons)
 
     @property
     def centroid(self):
@@ -29,25 +36,19 @@ class GeometricFigure:
 
     @property
     def bounds(self):
-        return self.multipolygon.bounds
+        return self.as_multipolygon.bounds
 
-    def simplify(self, tolerance=2000, verbose=False):
+    @property
+    def nodes_count(self):
+        return sum([x.nodes_count for x in self.elements])
+
+    def simplify(self, tolerance=2000, verbose=True):
         """
         Removes nodes from the path of every polygon according to tolerance
         """
-        polygons = [polygon for polygon in self.multipolygon.geoms]
-        for i, polygon in enumerate(polygons):
-            nodes_before = len(list(polygon.exterior.coords))
-            polygons[i] = polygons[i].simplify(tolerance=tolerance)
-            if verbose:
-                nodes = len(list(polygon.exterior.coords))
-                print("Polygon nodes reduced by {:.1f}%, from {} to {}".format(
-                    100*(nodes_before-nodes)/float(nodes_before),
-                    nodes_before,
-                    nodes
-                    )
-                )
-        self.multipolygon = shapely.geometry.MultiPolygon(polygons)
+        self.elements = [x.simplify(tolerance) for x in self.elements]
+        if verbose:
+            print("{} nodes.".format(self.nodes_count))
 
     def translate_to_center(self):
         """
@@ -56,23 +57,20 @@ class GeometricFigure:
         minx, miny, maxx, maxy = self.bounds
         x_offset = - min(minx, maxx)
         y_offset = - min(miny, maxy)
-        self.multipolygon = shapely.affinity.translate(
-            self.multipolygon,
-            xoff=x_offset,
-            yoff=y_offset
-        )
+        new_elements = []
+        for element in self.elements:
+            new_elements.append(element.translate(x_offset, y_offset))
+        self.elements = new_elements
 
     def scale_to_width(self, target_width):
         """
         Scales the geometries to a specific width
         """
         self.scaling_factor = target_width / self.width
-        self.multipolygon = shapely.affinity.scale(
-            self.multipolygon,
-            xfact=self.scaling_factor,
-            yfact=self.scaling_factor,
-            origin=(0, 0)
-        )
+        new_elements = []
+        for element in self.elements:
+            new_elements.append(element.scale_to_width(self.scaling_factor))
+        self.elements = new_elements
 
     def scale_to_height(self, target_height):
         """
@@ -131,7 +129,7 @@ class GeometricFigure:
             context.paint()
         # Cairo coordinate system is on the upper left corner, so
         # we need to do a vertical flip first
-        multipolygon = utils.vertical_flip(self.multipolygon)
+        multipolygon = utils.vertical_flip(self.as_multipolygon)
         for polygon in multipolygon:
             vertices = polygon.exterior.coords
             x, y = vertices[0]
