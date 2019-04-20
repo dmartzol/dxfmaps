@@ -37,8 +37,6 @@ from dxfmaps.map import Map
 from dxfmaps.utils import WORLD_COUNTRIES
 from dxfmaps.projections import *
 
-VERBOSE = False
-
 
 def main():
     map = Map(WORLD_COUNTRIES, continent="europe")
@@ -46,9 +44,9 @@ def main():
     map.simplify(tolerance=.015)
     map.project(MERCATOR)
     map.translate_to_center()
-    map.scale_to_width(5000)
+    map.scale_to_width(1000)
     map.add_labels()
-    map.to_png(stroke_width=2.0)
+    map.to_png(filename='europe.png', stroke_width=2.0)
     map.to_svg()
     map.to_dxf()
 
