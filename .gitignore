@@ -8,3 +8,4 @@ env
 *.png
 *.dxf
 dxfmaps.egg-info
+.idea

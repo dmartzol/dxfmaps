@@ -8,6 +8,15 @@ import cairocffi as cairo
 
 
 class GeometricFigure:
+    """
+    Represents a set of geometries that can be manipulated.
+
+    Args:
+        elements: list of NamedGeometry objects
+
+    Attributes:
+
+    """
     def __init__(self, elements):
         self.elements = elements
         self.units = "mm"
@@ -21,8 +30,15 @@ class GeometricFigure:
         return shapely.geometry.MultiPolygon(all_polygons)
 
     @property
+    def as_polygons(self):
+        all_polygons = []
+        for element in self.elements:
+            all_polygons.extend(element.as_polygons())
+        return all_polygons
+
+    @property
     def centroid(self):
-        return self.multipolygon.centroid
+        return self.as_multipolygon.centroid
 
     @property
     def width(self):
@@ -62,6 +78,18 @@ class GeometricFigure:
             new_elements.append(element.translate(x_offset, y_offset))
         self.elements = new_elements
 
+    def translate_to(self, target):
+        """
+        Translates all the geometries to the origin (0, 0)
+        """
+        text_center = self.centroid
+        x_offset = target.x - text_center.x
+        y_offset = target.y - text_center.y
+        new_elements = []
+        for element in self.elements:
+            new_elements.append(element.translate(x_offset, y_offset))
+        self.elements = new_elements
+
     def scale_to_width(self, target_width):
         """
         Scales the geometries to a specific width
@@ -69,7 +97,7 @@ class GeometricFigure:
         self.scaling_factor = target_width / self.width
         new_elements = []
         for element in self.elements:
-            new_elements.append(element.scale_to_width(self.scaling_factor))
+            new_elements.append(element.scale(self.scaling_factor))
         self.elements = new_elements
 
     def scale_to_height(self, target_height):
@@ -83,6 +111,21 @@ class GeometricFigure:
             yfact=self.scaling_factor,
             origin=(0, 0)
         )
+
+    def scale(self, factor):
+        """
+        Scales the geometries to a specific width
+        """
+        new_elements = []
+        for element in self.elements:
+            new_elements.append(element.scale(factor))
+        self.elements = new_elements
+
+    def rotate(self, angle):
+        new_elements = []
+        for element in self.elements:
+            new_elements.append(element.rotate(angle))
+        self.elements = new_elements
 
     def to_svg(self, filename='out.svg', stroke_width=.2, back_buffered=False):
         utils.save_svg(

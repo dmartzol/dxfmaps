@@ -79,3 +79,9 @@ def dataframe2polygons(geodataframe):
         else:
             raise Exception('Found non valid geometry')
     return polygons
+
+def scale_adjust(n):  # TODO: Deprecated
+    """
+    Adjusting scale of text in a DXF layer
+    """
+    return -1.3624*(0.001 - n)

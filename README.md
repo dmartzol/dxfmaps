@@ -8,6 +8,7 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 
 - [X] Convenient SVG and DXF formats to import into CNC software for processing and cut.
 - [X] Specify the desired width or height of the final SVG/DXF.
+- [X] Include label for each country in separate layers of the DXF file.
 - [X] Generate a vector map of all countries in a continent by just specifying the name of the continent.
 - [X] Reducing the number of points in the data by simplifying polygons.
 - [ ] Generate a map of all the provinces/states in a country specifying the name of the country.
@@ -32,20 +33,27 @@ pip install -e .
 ## Usage and examples
 
 ```Python
-import dxfmaps
+from dxfmaps.map import Map
+from dxfmaps.utils import WORLD_COUNTRIES
+from dxfmaps.projections import *
+
+VERBOSE = False
+
 
 def main():
-    sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    map = dxfmaps.map.Map(sf, continent="europe")
-    map.filter_by_area(area_thresold = .5)
-    map.project('mercator')
-    map.simplify(tolerance=.05)
+    map = Map(WORLD_COUNTRIES, continent="europe")
+    map.filter_by_area(area_limit=1.0)
+    map.simplify(tolerance=.015)
+    map.project(MERCATOR)
     map.translate_to_center()
-    map.scale_width()
-    map.to_svg(filename='europe.svg')
+    map.scale_to_width(5000)
+    map.add_labels()
+    map.to_png(stroke_width=2.0)
+    map.to_svg()
     map.to_dxf()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
 ```
 
@@ -54,19 +62,14 @@ if __name__ == '__main__':
 - [X] Implement Azimuthal and Winkel Triple and Mercator projections.
 - [X] Implement smaller buffered map for back support.
 - [X] Add country names.
-- [ ] Implement PNG support.
+- [X] Implement PNG support.
 - [ ] Implement maximum rectangle in polygon
-- [ ] Update this README.
 - [ ] Include shapefile reader into the module.
 - [ ] Add credits(Natural Earth logo, etc).
-- [ ] Replace asserts for exceptions/errors (correctly).
 - [ ] Comment code.
-- [ ] Implement scale as ratio for Azimuthal equidistant projection.
-- [ ] Implement verbose mode (correctly).
 - [ ] Add support for other data sources(.gov)
 - [ ] Calculate adequate tolerance for method 'simplify'.
 - [ ] Implement imperial units?
-- [ ] Try preserve_topology=False in simplify func
 
 
 ## License

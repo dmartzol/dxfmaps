@@ -1,33 +1,35 @@
-import dxfmaps
 from dxfmaps.map import Map
-import shapefile
-
-VERBOSE = False
+from dxfmaps.utils import WORLD_COUNTRIES
+from dxfmaps.projections import *
 
 
 def main():
-    sf = shapefile.Reader(dxfmaps.utils.WORLD_COUNTRIES)
-    list_of_countries = [
+    countries = {
         'norway',
         'spain',
+        'portugal',
         'france',
         'italy',
         'germany',
         'Denmark',
         'Poland',
-        'sweden'
-    ]
-    map = Map(sf, countries=list_of_countries)
-    map.filter_by_area(area_limit=.5)
-    projection = 'winkel_tripel'
-    map.project(projection)
-    # map.simplify(tolerance=.001)
+        'sweden',
+        'Australia',
+        'russia',
+        'China'
+    }
+    map = Map(WORLD_COUNTRIES, countries_set=countries)
+    map.filter_by_area(area_limit=4.0)
+    map.info()
+    map.project(MERCATOR)
+    map.simplify(tolerance=.001)
     map.translate_to_center()
-    map.scale_to_width(1000)
-    map.add_names()
+    map.scale_to_width(3000)
+    map.add_labels()
     map.to_png()
     # map.to_svg(filename='countries-{}.svg'.format(projection))
     # map.to_dxf(filename='countries.dxf')
+
 
 if __name__ == "__main__":
     main()

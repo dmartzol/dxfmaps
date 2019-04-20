@@ -1,9 +1,14 @@
 import shapely
+from shapely import affinity
+from shapely import geometry
 import time
 import random
 from operator import attrgetter
 import math
 
+# TODO: Delete temp_path
+TEMP_PATH = ("/Users/dani/dev/python/dxfmaps/shpf/10m-0-countries/"
+             "ne_10m_admin_0_countries.shp")
 WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
 WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
                    "ne_10m_admin_1_states_provinces.shp")
@@ -55,7 +60,7 @@ def inner_rectangle(polygon):
     return buffered.minimum_rotated_rectangle
 
 
-def vertical_flip(geometry):
+def vertical_flip_old(geometry):
     """
     Return a vertical reflection/flip of geometry.
 
@@ -69,6 +74,21 @@ def vertical_flip(geometry):
         yfact=-1.0
     )
     return result
+
+
+def vertical_flip(polygons_list):
+    """
+    Return a vertical reflection/flip of geometry.
+
+    rtype: list of shapely Polygons
+    """
+    multi = geometry.MultiPolygon(polygons_list)
+    multi = affinity.scale(
+        multi,
+        xfact=1.0,
+        yfact=-1.0
+    )
+    return [x for x in multi]
 
 
 def random_point_in(polygon):
@@ -91,7 +111,7 @@ def max_area_polygon(multipolygon):
     return max(multipolygon, key=attrgetter('area'))
 
 
-def multipolygon_to_polygon(geometry):
+def multipolygon_to_polygon(geometry):  # TODO: Deprecated?
     """
     If object is a Polygon, returns the object unmodified.
     If object is a Multipolygon, returns its biggest(in area) polygon.
@@ -117,7 +137,7 @@ def get_polygons(geometry):
     elif isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
         return list(geometry)
     else:
-        raise Exception('Non valid geometry')
+        raise Exception('Non valid geometry {}'.format(type(geometry)))
 
 
 def centroid_as_polygon(rectangle, relative_size=0.05):
@@ -129,12 +149,6 @@ def centroid_as_polygon(rectangle, relative_size=0.05):
     w, h = size_of_rotated_rectangle(rectangle)
     c = max(h, w) * relative_size
     return rectangle.centroid.buffer(c)
-
-
-def freetype_nodes():
-    """
-    https://stackoverflow.com/questions/12061882/render-vector-letter-in-python
-    """
 
 # TODO: Deprecated
 def rectangle_angle(rectangle):
@@ -186,20 +200,20 @@ def width_angle(rectangle):
     """Returns the length and angle(in degrees) of the longest side of a
     rotated rectangle
     """
-    point_A, point_B, point_C = rectangle.exterior.coords[:3]
-    w = distance(point_A, point_B)
-    h = distance(point_B, point_C)
-    if w > h:
-        angle = line_angle(point_A, point_B)
-        return w, angle
-    angle = line_angle(point_B, point_C)
-    return h, angle
+    point_a, point_b, point_c = rectangle.exterior.coords[:3]
+    a = distance(point_a, point_b)
+    b = distance(point_b, point_c)
+    if a > b:
+        angle = line_angle(point_a, point_b)
+        return a, b, angle
+    angle = line_angle(point_b, point_c)
+    return b, a, angle
 
 
 def size_of_rotated_rectangle(rectangle):
     """
     Returns the width and height of a rotated rectangle given as a
-    shapely polygon. Width and Height are not parallel to the axes.
+    shapely polygon. Width and Height may not be parallel to the axes.
     """
     point0, point1, point2 = rectangle.exterior.coords[:3]
     width = distance(point0, point1)
@@ -216,13 +230,6 @@ def reduction_increment(polygon, ratio=0.01):
     w, h = size_of_rotated_rectangle(polygon.minimum_rotated_rectangle)
     increment = max(h, w) * -ratio
     return increment
-
-
-def scale_adjust(n):  # TODO: Deprecated
-    """
-    Adjusting scale of text in a DXF layer
-    """
-    return -1.3624*(0.001 - n)
 
 
 def list_of_countries(sf):
@@ -268,25 +275,21 @@ def countries_by_continent(sf, continent):
             print(item["NAME"], item.oid)
 
 
-def save_svg(full_map, filename='out.svg', stroke_width=1.0, width=500, units="px"):  # TODO: Rename to ~geom2svg
+def polygons_to_svg(list_of_polygons, filename='out.svg', stroke_width=1.0, width=500, units="px"):
     size_and_units = "{}{}".format(str(width), units)
+    minx, miny, maxx, maxy = geometry.MultiPolygon(list_of_polygons).bounds
     poligon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
     file = open(filename, 'w')
     svg_style = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n"
-    file.write(svg_style.format(size_and_units, size_and_units, 0, 0, full_map.bounds[2], full_map.bounds[3]))
-    file.write("<g transform=\"translate(0,{}) scale(1,-1)\">\n".format(full_map.bounds[3]))
+    file.write(svg_style.format(size_and_units, size_and_units, 0, 0, maxx, maxy))
+    file.write("<g transform=\"translate(0,{}) scale(1,-1)\">\n".format(maxy))
     list_of_coords = []
-    if isinstance(full_map, shapely.geometry.multipolygon.MultiPolygon):
-        for polygon in full_map.geoms:
-            for x, y in polygon.exterior.coords:
-                list_of_coords.append("{},{}".format(x, y))
-            file.write(poligon_template.format(stroke_width, " ".join(list_of_coords)))
-            list_of_coords = []
-    if isinstance(full_map, shapely.geometry.polygon.Polygon):
-        polygon = full_map
+    for polygon in list_of_polygons:
         for x, y in polygon.exterior.coords:
             list_of_coords.append("{},{}".format(x, y))
         file.write(poligon_template.format(stroke_width, " ".join(list_of_coords)))
+        list_of_coords = []
+
     file.write("</g>\n")
     file.write("</svg>")
     file.close()

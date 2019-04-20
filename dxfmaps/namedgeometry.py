@@ -1,13 +1,37 @@
 import shapely
+from shapely import geometry
+from shapely import  affinity
 from dxfmaps import projections
 
 
 class NamedGeometry:
-    def __init__(self, geometry, name=None):
+    """
+    Class stores a geometry and its name.
+
+    Args:
+        geometry: Shapely Polygon or MultiPolygon
+        name (str, optional): the name given to the geometry
+
+    Attributes:
+        type:
+        is_multipolygon
+        is_polygon
+        bounds
+        nodes_count
+        as_polygons
+        scale_to_width
+        translate
+        filter_by_area
+        simplify
+        project
+    """
+
+    def __init__(self, geometry, name=None, tag=None):
         if geometry is None:
             raise ValueError("NamedGeometry needs a geometry")
         self.geometry = geometry
         self.name = name
+        self.tag = tag
 
     @property
     def type(self):
@@ -20,14 +44,14 @@ class NamedGeometry:
     def is_multipolygon(self):
         return isinstance(
             self.geometry,
-            shapely.geometry.multipolygon.MultiPolygon
+            geometry.multipolygon.MultiPolygon
         )
 
     @property
     def is_polygon(self):
         return isinstance(
             self.geometry,
-            shapely.geometry.polygon.Polygon
+            geometry.polygon.Polygon
         )
 
     @property
@@ -47,11 +71,12 @@ class NamedGeometry:
         elif self.is_multipolygon:
             return list(self.geometry)
         else:
+            print(type(self.geometry))
             msg = '{} is neither polygon or multipolygon'.format(self.name)
             raise TypeError(msg)
 
-    def scale_to_width(self, scaling_factor):
-        geometry = shapely.affinity.scale(
+    def scale(self, scaling_factor):
+        geometry = affinity.scale(
                     self.geometry,
                     xfact=scaling_factor,
                     yfact=scaling_factor,
@@ -61,7 +86,7 @@ class NamedGeometry:
         return copy
 
     def translate(self, x_offset, y_offset):
-        geometry = shapely.affinity.translate(
+        geometry = affinity.translate(
             self.geometry,
             xoff=x_offset,
             yoff=y_offset
@@ -69,7 +94,21 @@ class NamedGeometry:
         copy = NamedGeometry(geometry, name=self.name)
         return copy
 
+    def rotate(self, angle):
+        geometry = affinity.rotate(
+            self.geometry,
+            angle,
+            use_radians=False
+        )
+        copy = NamedGeometry(geometry, name=self.name)
+        return copy
+
     def filter_by_area(self, limit):
+        """
+        Returns a NamedGeometry object with the geometris that
+        are larger in area than the given limit. If none of them is
+        larger, returns None
+        """
         def big(polygon):
             return polygon.area > limit
         if self.is_polygon:

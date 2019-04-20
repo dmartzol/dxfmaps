@@ -1,39 +1,52 @@
 import shapely
 import shapely.wkt
+from shapely import affinity
+from shapely import geometry
 from dxfmaps import utils
-from .geometricfigure import GeometricFigure
 from .fonts import *
+import cairocffi as cairo
 
 
-def label(polygon, name, box=False, centroid=False, uppercase=True):
-    polygons = []
-    inner_rectangle = utils.inner_rectangle(polygon)
-    cir_centroid = utils.centroid_as_polygon(inner_rectangle)
-    if box:
-        polygons.append(inner_rectangle)
-    if centroid:
-        polygons.append(cir_centroid)
-    if uppercase:
-        name = name[0].upper() + name[1:]
-    text = Text(name)
-    text.move_and_fit_box(inner_rectangle)
-    rendered_text = text.multipolygon
-    polygons.extend(rendered_text)
-    return polygons
-
-
-class Text(GeometricFigure):
-    def __init__(self, string, font=VERA, spacing=100.0):
+class Text:
+    def __init__(self, string, font=VERA, relative_spacing=0.1):
         self.string = string
         self.font = font
-        self.spacing = spacing
-        return super().__init__(self._as_multipolygon())
+        self.spacing = relative_spacing * self.em_width
+        self.polygons = self._build_polygons()
 
-    def _as_multipolygon(self):
+    @property
+    def as_multipolygon(self):
+        return geometry.MultiPolygon(self.polygons)
+
+    @property
+    def centroid(self):
+        return self.as_multipolygon.centroid
+
+    @property
+    def width(self):
+        minx, _, maxx, _ = self.bounds
+        return maxx - minx
+
+    @property
+    def height(self):
+        _, miny, _, maxy = self.bounds
+        return maxy - miny
+
+    @property
+    def bounds(self):
+        return self.as_multipolygon.bounds
+
+    @property
+    def em_width(self):
+        m = shapely.wkt.loads(self.font['M'])
+        minx, miny, maxx, maxy = m.bounds
+        em_width = maxx - minx
+        return em_width
+
+    def _build_polygons(self):
         string = self.string
         font = self.font
-        # geoms = []
-        geoms = {}
+        geoms = []
         right_bounds = []
         for char in string:
             if char not in font:
@@ -46,54 +59,45 @@ class Text(GeometricFigure):
             minx, _, _, _ = geom.bounds
             if right_bounds:
                 x_offset = right_bounds[-1] - minx + self.spacing
-                geom = shapely.affinity.translate(geom, xoff=x_offset)
+                geom = affinity.translate(geom, xoff=x_offset)
             _, _, maxx, _ = geom.bounds
             right_bounds.append(maxx)
-            geoms[char] = utils.get_polygons(geom)
+            geoms.extend(utils.get_polygons(geom))
         return geoms
 
-    def _scale_old(self, factor):
-        self.multipolygon = shapely.affinity.scale(
-            self.multipolygon,
+    def rotate(self, angle):
+        multipolygon = geometry.MultiPolygon(self.polygons)
+        multipolygon = affinity.rotate(multipolygon, angle)
+        self.polygons = [x for x in multipolygon]
+
+    def scale(self, factor):
+        """
+        Scales the geometries to a specific width
+        """
+        multipolygon = geometry.MultiPolygon(self.polygons)
+        multipolygon = affinity.scale(
+            multipolygon,
             xfact=factor,
             yfact=factor
         )
+        self.polygons = [x for x in multipolygon]
 
-    def _scale(self, factor):
-        new_dict = {}
-        for name, polygons in self.countries_by_name.items():
-            new_polygons = []
-            for polygon in polygons:
-                new_polygon = shapely.affinity.scale(
-                    polygon,
-                    xfact=factor,
-                    yfact=factor
-                )
-                new_polygons.append(polygon)
-            new_dict[name] = new_polygons
-        self.countries_by_name = new_dict
-
-    def _translate_to(self, target):
-        text_center = self.centroid
+    def translate_to(self, target):
+        """
+        Translates all the geometries to the origin (0, 0)
+        """
+        text_center = self.centroid  # TODO: Use mid point instead of centroid
         x_offset = target.x - text_center.x
         y_offset = target.y - text_center.y
-        self.multipolygon = shapely.affinity.translate(
-            self.multipolygon,
-            xoff=x_offset,
-            yoff=y_offset
-        )
-
-    def _rotate(self, angle):
-        self.multipolygon = shapely.affinity.rotate(
-            self.multipolygon,
-            angle,
-            use_radians=False
-        )
+        new_elements = []
+        for poly in self.polygons:
+            new = affinity.translate(poly, xoff=x_offset, yoff=y_offset)
+            new_elements.append(new)
+        self.polygons = new_elements
 
     def move_and_fit_box(self, rectangle):
-        rectangle_w = max(utils.size_of_rotated_rectangle(rectangle))
-        l, angle = utils.width_angle(rectangle)
-        factor = rectangle_w / self.width
-        self._scale(factor)
-        self._translate_to(rectangle.centroid)
-        self._rotate(angle)
+        w, _, angle = utils.width_angle(rectangle)
+        factor = w / self.width
+        self.scale(factor)
+        self.translate_to(rectangle.centroid)
+        self.rotate(angle)
