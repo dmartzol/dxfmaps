@@ -14,14 +14,15 @@ from .utils import (
 
 
 class Map:
-    def __init__(
-            self,
-            path,
-            continent=None,
-            countries_set=None,
-            country_field='NAME',
-            units='px'
-    ):
+    def __init__(self, path, continent=None, countries_set=None,
+                 country_field='NAME', units='px'):
+        """
+        :param path: string specifying the path to the shapefile
+        :param continent: name to plot its countries
+        :param countries_set: set of countries you want to include in the map
+        :param country_field: name of the field in the shapefile that contains countries geometries
+        :param units: units to use for the output
+        """
         sf = shapefile.Reader(path)
         self.sf = sf
         self.units = units
@@ -36,6 +37,9 @@ class Map:
 
     @property
     def as_polygons(self):
+        """Return the contours of all countries as a list of shapely polygons
+        :return: list of shapely polygons
+        """
         all_polygons = []
         for country in self.countries:
             all_polygons.extend(country.contours)
@@ -43,6 +47,9 @@ class Map:
 
     @property
     def labels_as_polygons(self):
+        """Return the labels of all countries in a list of shapely polygons
+        :return: list of shapely polygons
+        """
         all_polygons = []
         for country in self.countries:
             if country.labels:
@@ -51,6 +58,9 @@ class Map:
 
     @property
     def as_multipolygon(self):
+        """Return a shapely multipolygon containing all contours of the countries
+        :return: Shapely MultiPolygon
+        """
         return shapely.geometry.MultiPolygon(self.as_polygons)
 
     @property
@@ -69,9 +79,20 @@ class Map:
 
     @property
     def nodes_count(self):
+        """Calculate the number of all nodes of all the countries in the map.
+        It does not include the nodes in the labels.
+
+        :return: integer: Number of nodes in countries contours
+        """
         return sum([x.nodes_count for x in self.countries])
 
     def check_shapefile(self):
+        """Checks if all geometries read from the Shapefile are either Shapely
+        Polygons or MultiPolygons. Raises TypeError if it finds a different
+        geometry.
+
+        :return: None
+        """
         for shapeRecord in self.sf.shapeRecords():
             geom = geometry.shape(shapeRecord.shape.__geo_interface__)
             is_polygon = isinstance(
@@ -221,7 +242,7 @@ class Map:
         for country in self.countries:
             country.generate_labels(box, centroid, uppercase)
 
-    def to_png(self, filename='out.png', stroke_width=1.0):
+    def to_png(self, filename='out.png', stroke_width=1.0, white_bg=False):
         height = int(self.height)
         width = int(self.width)
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
@@ -229,9 +250,10 @@ class Map:
         context.set_line_cap(cairo.LINE_CAP_ROUND)
         context.set_line_join(cairo.LINE_JOIN_ROUND)
         context.set_line_width(stroke_width)
-        with context:
-            context.set_source_rgb(1, 1, 1)
-            context.paint()
+        if white_bg:
+            with context:
+                context.set_source_rgb(1, 1, 1)
+                context.paint()
         # Cairo coordinate system is on the upper left corner, so
         # we need to do a vertical flip first
         polygons = self.as_polygons
