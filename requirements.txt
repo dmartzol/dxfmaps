@@ -1,4 +1,9 @@
+cairocffi==1.0.2
+cffi==1.12.2
+-e git+git@github.com:dmartzol/dxfmaps.git@2872e243be27d884153e515efe807bd8b14edf34#egg=dxfmaps
 ezdxf==0.9
+pep8==1.7.1
+pycparser==2.19
 pyparsing==2.3.1
 pyshp==2.0.1
 Shapely==1.6.4.post2
