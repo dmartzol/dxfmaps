@@ -62,7 +62,6 @@ if __name__ == "__main__":
 - [X] Add country names.
 - [X] Implement PNG support.
 - [ ] Implement maximum rectangle in polygon
-- [ ] Include shapefile reader into the module.
 - [ ] Add credits(Natural Earth logo, etc).
 - [ ] Comment code.
 - [ ] Add support for other data sources(.gov)
