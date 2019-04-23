@@ -3,12 +3,10 @@ import shapely
 import cairocffi as cairo
 import ezdxf
 from shapely import geometry
+from shapely.geometry import Polygon, MultiPolygon
+from typing import List, Tuple
 from .country import Country
-from .utils import (
-    get_polygons,
-    vertical_flip,
-    polygons_to_svg
-)
+from .utils import get_polygons, vertical_flip, polygons_to_svg
 
 # TODO: Separate information methods in a different class
 
@@ -36,8 +34,8 @@ class Map:
         self.scaling_factor = None
 
     @property
-    def as_polygons(self):
-        """Return the contours of all countries as a list of shapely polygons
+    def as_polygons(self) -> List[Polygon]:
+        """Return the contours of all countries as a list of     shapely polygons
         :return: list of shapely polygons
         """
         all_polygons = []
@@ -46,9 +44,9 @@ class Map:
         return all_polygons
 
     @property
-    def labels_as_polygons(self):
+    def labels_as_polygons(self) -> List[Polygon]:
         """Return the labels of all countries in a list of shapely polygons
-        :return: list of shapely polygons
+        :return: list of labels as Shapely Polygons
         """
         all_polygons = []
         for country in self.countries:
@@ -57,7 +55,7 @@ class Map:
         return all_polygons
 
     @property
-    def as_multipolygon(self):
+    def as_multipolygon(self) -> MultiPolygon:
         """Return a shapely multipolygon containing all contours of the countries
         :return: Shapely MultiPolygon
         """
@@ -65,20 +63,24 @@ class Map:
 
     @property
     def bounds(self):
+        """Return bounds of entire map as a 4 length tuple.
+
+        :return: tuple minx, miny, maxx, maxy
+        """
         return self.as_multipolygon.bounds
 
     @property
-    def height(self):
+    def height(self) -> float:
         _, miny, _, maxy = self.bounds
         return maxy - miny
 
     @property
-    def width(self):
+    def width(self) -> float:
         minx, _, maxx, _ = self.bounds
         return maxx - minx
 
     @property
-    def nodes_count(self):
+    def nodes_count(self) -> int:
         """Calculate the number of all nodes of all the countries in the map.
         It does not include the nodes in the labels.
 
@@ -86,7 +88,7 @@ class Map:
         """
         return sum([x.nodes_count for x in self.countries])
 
-    def check_shapefile(self):
+    def check_shapefile(self) -> None:
         """Checks if all geometries read from the Shapefile are either Shapely
         Polygons or MultiPolygons. Raises TypeError if it finds a different
         geometry.
@@ -109,7 +111,18 @@ class Map:
                 msg = "{} is not a valid geometry. It should not be included"
                 raise TypeError(msg.format(name))
 
-    def build_countries(self):
+    def build_countries(self) -> List[Polygon]:
+        """Return a list of polygons imported from the shapefile.
+
+        First checks if the user used both conditions, countries and continent,
+        to create the map. If so, it raises ValueError.
+
+        Then creates the set of countries if a continent was given.
+
+        Then it reads the countries from the shapefile.
+
+        :return: list of Shapely Polygons
+        """
         if self.countries_set and self.continent:
             raise ValueError("Cannot apply 2 filters.")
         elif self.continent:
@@ -124,13 +137,12 @@ class Map:
             raise ValueError("Not countries found")
         return countries
 
-    def get_countries(self, continent):
-        """
-        Given a continent, return a set of countries
-        pertaining to it according to the shapefile
+    def get_countries(self, continent: str) -> set:
+        """Given a continent, return a set of countries pertaining to it
+        according to the shapefile
 
-        Args:
-            continent: string
+        :param continent: Name of the continent
+        :return: set of Shapely Polygons
         """
         countries_set = set()
         for shapeRecord in self.sf.shapeRecords():
@@ -143,6 +155,10 @@ class Map:
         return countries_set
 
     def info(self):
+        """Prints on screen some info about the current map.
+
+        :return: None
+        """
         print('-------- info --------')
         print("{} countries".format(len(self.countries)))
         for country in self.countries:
@@ -166,10 +182,8 @@ class Map:
         self.countries = new_countries
 
     def item_info(self, row, field=None):
-        """
-        Prints every field and its values for the item in the specified row of
-        the
-        shapefile.
+        """Prints every field and its values for the item in the specified row
+        of the shapefile.
         """
         fields = [item[0] for item in self.sf.fields[1:]]
         record = self.sf.record(row)
@@ -180,16 +194,17 @@ class Map:
                 print("{} - {}: {}".format(i, field, record[field]))
 
     def project(self, projection_name):
-        """
-        Transforms the current GPS coordinates to the chosen projection
+        """Transforms the current GPS coordinates to the chosen projection
         coordinates.
+
         Available projections:
-            - LambertAzimuthalEqualArea
-            - mercator
-            - winkel_tripel
+            - Lambert Azimuthal Equal Area
+            - Mercator
+            - Winkel Tripel
+
+        :param projection_name: Constant from .dxfmaps.utils
+        :return: None
         """
-        # if projection_name not in dir(projections):
-        #     raise ValueError("Wrong projection name")
         new_elements = []
         for country in self.countries:
             new_elements.append(country.project(projection_name))
