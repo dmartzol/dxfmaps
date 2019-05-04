@@ -3,6 +3,7 @@ from shapely import affinity
 from shapely import geometry
 from dxfmaps import projections
 from dxfmaps import utils
+from dxfmaps.rectangle import mrcd
 from .text import Text
 
 
@@ -77,19 +78,28 @@ class Country:
             new_elements.append(polygon.simplify(tolerance))
         return Country(new_elements, self.name)
 
-    def generate_labels(self, box, centroid, uppercase):
+    def generate_labels(self, box, centroid, uppercase, n, verbose=True):
+        if verbose:
+            print("Generating labels for {}".format(self.name))
         new_polygons = []
         name = self.name
         for polygon in self.contours:
-            inner_rectangle = utils.inner_rectangle(polygon)
-            if box:
-                new_polygons.append(inner_rectangle)
-            if centroid:
-                cir_centroid = utils.centroid_as_polygon(inner_rectangle)
-                new_polygons.append(cir_centroid)
             if uppercase:
                 name = name[0].upper() + name[1:]
             text = Text(name)
-            text.move_and_fit_box(inner_rectangle)
+            ratio = text.width / text.height
+            inner_rectangles = []
+            while len(inner_rectangles) == 0:
+                print("Trying {} with {} points".format(self.name, n))
+                inner_rectangles = mrcd(polygon, n=n, ratio=ratio)
+                n += 5
+            rectangle = inner_rectangles[0]
+            text.move_and_fit_box(rectangle)
+            # rectangle = utils.rectangle(polygon)
+            if box:
+                new_polygons.append(rectangle)
+            if centroid:
+                cir_centroid = utils.centroid_as_polygon(rectangle)
+                new_polygons.append(cir_centroid)
             new_polygons.extend(text.polygons)
         self.labels = new_polygons

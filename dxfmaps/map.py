@@ -5,7 +5,7 @@ import ezdxf
 from shapely import geometry
 from shapely.geometry import Polygon, MultiPolygon
 from typing import List
-from .country import Country
+from dxfmaps.country import Country
 from .utils import get_polygons, vertical_flip, polygons_to_svg
 
 # TODO: Separate information methods in a different class
@@ -13,7 +13,7 @@ from .utils import get_polygons, vertical_flip, polygons_to_svg
 
 class Map:
     def __init__(self, path, continent=None, countries_set=None,
-                 country_field='NAME', units='px'):
+                 country_field='NAME', units='mm'):
         """
         :param path: string specifying the path to the shapefile
         :param continent: name to plot its countries
@@ -134,7 +134,7 @@ class Map:
                 geom = geometry.shape(shapeRecord.shape.__geo_interface__)
                 countries.append(Country(get_polygons(geom), name))
         if not countries:
-            raise ValueError("Not countries found")
+            raise ValueError("No countries found")
         return countries
 
     def get_countries(self, continent: str) -> set:
@@ -234,6 +234,18 @@ class Map:
             new_elements.append(country.scale(self.scaling_factor))
         self.countries = new_elements
 
+    def scale(self, scaling_factor) -> None:
+        """Scales the geometries to a specific width
+
+        :param target_width:
+        :return:
+        """
+        self.scaling_factor = scaling_factor
+        new_elements = []
+        for country in self.countries:
+            new_elements.append(country.scale(self.scaling_factor))
+        self.countries = new_elements
+
     def simplify(self, tolerance=.0002, verbose=True):
         """
         Removes nodes from the path of every polygon according to tolerance
@@ -253,9 +265,9 @@ class Map:
                 x.record.oid)
             )
 
-    def add_labels(self, box=False, centroid=False, uppercase=True):
+    def add_labels(self, box=False, centroid=False, uppercase=True, n=10):
         for country in self.countries:
-            country.generate_labels(box, centroid, uppercase)
+            country.generate_labels(box, centroid, uppercase, n)
 
     def to_png(self, filename='out.png', stroke_width=1.0, white_bg=False):
         height = int(self.height)

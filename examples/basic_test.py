@@ -4,19 +4,18 @@ from dxfmaps.projections import *
 
 
 def main():
-    countries = {'Sweden'}
+    countries = {'Spain'}
     map = Map(WORLD_COUNTRIES, countries_set=countries)
-    map.filter_by_area(area_limit=16)
+    map.filter_by_area(area_limit=9)
     map.info()
     map.project(MERCATOR)
-    map.simplify(tolerance=.04)
+    map.simplify(tolerance=.02)
     map.translate_to_center()
-    map.scale_to_width(1000)
-    # map.add_labels()
+    map.scale(705.6870651946915)
+    # map.scale_to_width(1000)
+    map.add_labels(box=True, n=25)
     map.to_png(white_bg=True)
-    print(map.countries[0].contours[0].wkt)
-    print(map.width)
-    # map.to_svg(filename='spain.svg')
+    map.to_dxf(filename='spain.dxf')
 
 
 if __name__ == "__main__":

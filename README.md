@@ -11,6 +11,7 @@ Python module to generate vector maps from ESRI Shapefiles with the purpose of c
 - [X] Include label for each country in separate layers of the DXF file.
 - [X] Generate a vector map of all countries in a continent by just specifying the name of the continent.
 - [X] Reducing the number of points in the data by simplifying polygons.
+- [X] Implement greatest rectangle(in area) contained in a polygon
 - [ ] Generate a map of all the provinces/states in a country specifying the name of the country.
 
 ## Installation
@@ -61,11 +62,11 @@ if __name__ == "__main__":
 - [X] Implement smaller buffered map for back support.
 - [X] Add country names.
 - [X] Implement PNG support.
-- [ ] Implement maximum rectangle in polygon
 - [ ] Add credits(Natural Earth logo, etc).
 - [ ] Comment code.
 - [ ] Add support for other data sources(.gov)
 - [ ] Calculate adequate tolerance for method 'simplify'.
+- [ ] Move unused functions to deprecated
 - [ ] Implement imperial units?
 
 

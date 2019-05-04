@@ -8,7 +8,7 @@ import cairocffi as cairo
 
 
 class Text:
-    def __init__(self, string, font=VERA, relative_spacing=0.1):
+    def __init__(self, string, font=VERA, relative_spacing=0.05):
         self.string = string
         self.font = font
         self.spacing = relative_spacing * self.em_width
@@ -21,6 +21,10 @@ class Text:
     @property
     def centroid(self):
         return self.as_multipolygon.centroid
+
+    @property
+    def envelope(self):
+        return self.as_multipolygon.envelope
 
     @property
     def width(self):
@@ -65,9 +69,9 @@ class Text:
             geoms.extend(utils.get_polygons(geom))
         return geoms
 
-    def rotate(self, angle):
+    def rotate(self, angle, origin=None):
         multipolygon = geometry.MultiPolygon(self.polygons)
-        multipolygon = affinity.rotate(multipolygon, angle)
+        multipolygon = affinity.rotate(multipolygon, angle, origin=origin)
         self.polygons = [x for x in multipolygon]
 
     def scale(self, factor):
@@ -86,7 +90,7 @@ class Text:
         """
         Translates all the geometries to the origin (0, 0)
         """
-        text_center = self.centroid  # TODO: Use mid point instead of centroid
+        text_center = self.envelope.centroid
         x_offset = target.x - text_center.x
         y_offset = target.y - text_center.y
         new_elements = []
@@ -96,8 +100,8 @@ class Text:
         self.polygons = new_elements
 
     def move_and_fit_box(self, rectangle):
-        w, _, angle = utils.width_angle(rectangle)
-        factor = w / self.width
+        w, h, angle = utils.width_angle(rectangle)
+        factor = min(w / self.width, h / self.height)
         self.scale(factor)
         self.translate_to(rectangle.centroid)
-        self.rotate(angle)
+        self.rotate(angle, origin=rectangle.centroid)
