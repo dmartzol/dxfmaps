@@ -4,7 +4,7 @@ import cairocffi as cairo
 import ezdxf
 from shapely import geometry
 from shapely.geometry import Polygon, MultiPolygon
-from typing import List, Tuple
+from typing import List
 from .country import Country
 from .utils import get_polygons, vertical_flip, polygons_to_svg
 
@@ -111,7 +111,7 @@ class Map:
                 msg = "{} is not a valid geometry. It should not be included"
                 raise TypeError(msg.format(name))
 
-    def build_countries(self) -> List[Polygon]:
+    def build_countries(self) -> List[Country]:
         """Return a list of polygons imported from the shapefile.
 
         First checks if the user used both conditions, countries and continent,
@@ -155,7 +155,7 @@ class Map:
         return countries_set
 
     def info(self):
-        """Prints on screen some info about the current map.
+        """Prints some info on screen about the current map.
 
         :return: None
         """
@@ -210,7 +210,7 @@ class Map:
             new_elements.append(country.project(projection_name))
         self.countries = new_elements
 
-    def translate_to_center(self):
+    def translate_to_center(self) -> None:
         """
         Translates all the geometries to the origin (0, 0)
         """
@@ -222,7 +222,7 @@ class Map:
             new_elements.append(country.translate(x_offset, y_offset))
         self.countries = new_elements
 
-    def scale_to_width(self, target_width):
+    def scale_to_width(self, target_width: int) -> None:
         """Scales the geometries to a specific width
 
         :param target_width:
@@ -269,7 +269,7 @@ class Map:
             with context:
                 context.set_source_rgb(1, 1, 1)
                 context.paint()
-        # Cairo coordinate system is on the upper left corner, so
+        # Cairo coordinate origin is on the upper left corner, so
         # we need to do a vertical flip first
         polygons = self.as_polygons
         polygons.extend(self.labels_as_polygons)

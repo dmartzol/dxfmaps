@@ -1,6 +1,5 @@
-import shapely
 from shapely import affinity
-from shapely import geometry
+from shapely.geometry import Polygon, MultiPolygon, Point
 import time
 import random
 from operator import attrgetter
@@ -38,18 +37,18 @@ def greatest_contained_rectangle(polygon, points_count=20):
     return polygon
 
 
-def inner_rectangle(polygon):
+def inner_rectangle(polygon: Polygon) -> object:
     """Returns a shapely box contained in a given polygon.
 
-    This is not the largest contained box, but it is a relatively large box
-    that is guaranteed to be contained in the given polygon. This is faster
-    than finding the largest contained box.
+    This is not the largest contained rectangle, but it is a relatively large
+    rectangle that is guaranteed to be contained in the given polygon. This is
+    faster than finding the largest contained rectangle.
     """
     p = 0.02
     increment = reduction_increment(polygon)
     buffered = polygon.buffer(increment, 1)
     while True:
-        if isinstance(buffered, shapely.geometry.MultiPolygon):
+        if isinstance(buffered, MultiPolygon):
             buffered = max_area_polygon(buffered)
         if polygon.contains(buffered.minimum_rotated_rectangle):
             break
@@ -61,14 +60,13 @@ def inner_rectangle(polygon):
 
 
 def vertical_flip_old(geometry):
-    """
-    Return a vertical reflection/flip of geometry.
+    """Return a vertical reflection/flip of geometry.
 
     rtype: shapely.geometry.MultiPolygon
     """
-    if not isinstance(geometry, shapely.geometry.MultiPolygon):
+    if not isinstance(geometry, MultiPolygon):
         raise ValueError("Argument must be a multipolygon")
-    result = shapely.affinity.scale(
+    result = affinity.scale(
         geometry,
         xfact=1.0,
         yfact=-1.0
@@ -82,7 +80,7 @@ def vertical_flip(polygons_list):
 
     rtype: list of shapely Polygons
     """
-    multi = geometry.MultiPolygon(polygons_list)
+    multi = MultiPolygon(polygons_list)
     multi = affinity.scale(
         multi,
         xfact=1.0,
@@ -99,8 +97,8 @@ def random_point_in(polygon):
     while True:
         x = random.uniform(minx, maxx)
         y = random.uniform(miny, maxy)
-        if polygon.contains(shapely.geometry.Point(x, y)):
-            return (x, y)
+        if polygon.contains(Point(x, y)):
+            return x, y
 
 
 def max_area_polygon(multipolygon):
@@ -118,9 +116,9 @@ def multipolygon_to_polygon(geometry):  # TODO: Deprecated?
     This means this function gives only 1 polygon for each country.
     This will have to be fixed later.
     """
-    if isinstance(geometry, shapely.geometry.polygon.Polygon):
+    if isinstance(geometry, Polygon):
         return geometry
-    elif isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
+    elif isinstance(geometry, MultiPolygon):
         return max_area_polygon(geometry)
     else:
         raise Exception('Non valid geometry')
@@ -132,9 +130,9 @@ def get_polygons(geometry):
     only element.
     If geometry is a multipolygon, returns a list of its polygons.
     """
-    if isinstance(geometry, shapely.geometry.polygon.Polygon):
+    if isinstance(geometry, Polygon):
         return [geometry]
-    elif isinstance(geometry, shapely.geometry.multipolygon.MultiPolygon):
+    elif isinstance(geometry, MultiPolygon):
         return list(geometry)
     else:
         raise Exception('Non valid geometry {}'.format(type(geometry)))
@@ -151,6 +149,8 @@ def centroid_as_polygon(rectangle, relative_size=0.05):
     return rectangle.centroid.buffer(c)
 
 # TODO: Deprecated
+
+
 def rectangle_angle(rectangle):
     """
     Returns the angle in radians of a rotated rectangle.
@@ -161,18 +161,18 @@ def rectangle_angle(rectangle):
     return math.degrees(angle)
 
 
-def distance(pointA, pointB):
+def distance(point_a, point_b):
     """
     Returns the distance between two points given as tuples
     """
-    x0, y0 = pointA
-    x1, y1 = pointB
+    x0, y0 = point_a
+    x1, y1 = point_b
     return math.hypot(x0-x1, y0-y1)
 
 
-def slope(point_A, point_B):
-    x0, y0 = point_A
-    x1, y1 = point_B
+def slope(point_a, point_b):
+    x0, y0 = point_a
+    x1, y1 = point_b
     if x0 == x1:
         return None
     return (y1-y0)/(x1-x0)
@@ -187,11 +187,11 @@ def slope_angle(slope):
     return math.degrees(math.atan(slope))
 
 
-def line_angle(point_A, point_B):
+def line_angle(point_a, point_b):
     """
     Returns the angle(in degrees) of a line given 2 points from it
     """
-    line_slope = slope(point_A, point_B)
+    line_slope = slope(point_a, point_b)
     angle = slope_angle(line_slope)
     return angle
 
@@ -277,17 +277,20 @@ def countries_by_continent(sf, continent):
 
 def polygons_to_svg(list_of_polygons, filename='out.svg', stroke_width=1.0, width=500, units="px"):
     size_and_units = "{}{}".format(str(width), units)
-    minx, miny, maxx, maxy = geometry.MultiPolygon(list_of_polygons).bounds
-    poligon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
+    minx, miny, maxx, maxy = MultiPolygon(list_of_polygons).bounds
+    polygon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
     file = open(filename, 'w')
-    svg_style = "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\" width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n"
+    svg_style = """
+                <svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"
+                width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n
+                """
     file.write(svg_style.format(size_and_units, size_and_units, 0, 0, maxx, maxy))
     file.write("<g transform=\"translate(0,{}) scale(1,-1)\">\n".format(maxy))
     list_of_coords = []
     for polygon in list_of_polygons:
         for x, y in polygon.exterior.coords:
             list_of_coords.append("{},{}".format(x, y))
-        file.write(poligon_template.format(stroke_width, " ".join(list_of_coords)))
+        file.write(polygon_template.format(stroke_width, " ".join(list_of_coords)))
         list_of_coords = []
 
     file.write("</g>\n")
