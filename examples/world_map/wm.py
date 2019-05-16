@@ -167,27 +167,28 @@ def main():
     map.simplify(tolerance=TOLERANCE)
     map.info()
     # map.project(WINKEL_TRIPEL)
-    map.project(WINKEL_TRIPEL)
+    map.project(MERCATOR)
     map.translate_to_center()
     map.scale_to_width(2000)
+    print(map.bounds)
     scaling_factor = map.scaling_factor
     map.to_dxf(filename='world.dxf')
     map.to_png(filename='world.png', white_bg=True)
 
-    for country in countries:
-        print(country)
-        country_set = set([country])
-        map_by_pieces = Map(shp_path, countries_set=country_set)
-        map_by_pieces.filter_by_area(area_limit=AREA_LIMIT)
-        map_by_pieces.simplify(tolerance=TOLERANCE)
-        map_by_pieces.project(WINKEL_TRIPEL)
-        map_by_pieces.translate_to_center()
-        map_by_pieces.scale(scaling_factor)
-        map_by_pieces.add_labels(n=15, fast=True)
-        map_by_pieces.to_svg(filename=country + '.svg', stroke=0.2)
-        map_by_pieces.to_png(filename=country + '.png', stroke=0.2)
-        map_by_pieces.to_dxf(filename=country + '.dxf')
-        break
+    # for country in countries:
+    #     print(country)
+    #     country_set = set([country])
+    #     map_by_pieces = Map(shp_path, countries_set=country_set)
+    #     map_by_pieces.filter_by_area(area_limit=AREA_LIMIT)
+    #     map_by_pieces.simplify(tolerance=TOLERANCE)
+    #     map_by_pieces.project(WINKEL_TRIPEL)
+    #     map_by_pieces.translate_to_center()
+    #     map_by_pieces.scale(scaling_factor)
+    #     map_by_pieces.add_labels(n=15, fast=True)
+    #     map_by_pieces.to_svg(filename=country + '.svg', stroke=0.2)
+    #     map_by_pieces.to_png(filename=country + '.png', stroke=0.2)
+    #     map_by_pieces.to_dxf(filename=country + '.dxf')
+    #     break
 
 
 if __name__ == "__main__":

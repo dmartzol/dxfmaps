@@ -17,7 +17,7 @@ def azimuthal_equidistant(lon, lat):
     return x, y
 
 
-def mercator(lon, lat, rf=1.0 / 1000000.0, lon0=0):
+def mercator(lon, lat, rf=1.0 / 1000000.0, lon0=0, max_lat=85, min_lat=-89):
     """Returns Mercator cartesian coodinates from GPS coordinates
     lon -- GPS longitude coordinate given in degrees
     lat -- GPS latitude coordinate given in degrees
@@ -25,10 +25,12 @@ def mercator(lon, lat, rf=1.0 / 1000000.0, lon0=0):
     rf - Representative Factor (scale)
     ----
     """
-    lon, lat = radians(lon), radians(lat)
+    lon_rad, lat_rad = radians(lon), radians(lat)
     r = rf * EARTH_RADIUS
-    x = r * (lon - lon0)
-    y = r * log(tan(pi / 4.0 + lat / 2.0))
+    x = r * (lon_rad - lon0)
+    y = r * log(tan(pi / 4.0 + lat_rad / 2.0))
+    if lat < min_lat:
+        return x, -20.26181
     return x, y
 
 
@@ -52,11 +54,17 @@ def winkel_tripel(lon, lat, lon0=0):
     return x, y
 
 
+def secant(x):
+    if cos(x) == 0:
+        return 0
+    return 1 / cos(x)
+
+
 def sinc(x):
     if x == 0:
         return 1
     else:
-        return math.sin(x) / x
+        return sin(x) / x
 
 
 def lambert_azimuthal_equal_area(lon, lat, lon0=0, lat0=0):
