@@ -17,7 +17,7 @@ def azimuthal_equidistant(lon, lat):
     return x, y
 
 
-def mercator(lon, lat, rf=1.0/1000000.0, lon0=0):
+def mercator(lon, lat, rf=1.0 / 1000000.0, lon0=0):
     """Returns Mercator cartesian coodinates from GPS coordinates
     lon -- GPS longitude coordinate given in degrees
     lat -- GPS latitude coordinate given in degrees
@@ -62,7 +62,7 @@ def sinc(x):
 def lambert_azimuthal_equal_area(lon, lat, lon0=0, lat0=0):
     lon, lat = radians(lon), radians(lat)
     lon0, lat0 = radians(lon0), radians(lat0)
-    k = sqrt(2 / (1 + sin(lat0)*sin(lat) + cos(lat0)*cos(lat)*cos(lon-lon0)))
-    x = k * cos(lat) * sin(lon-lon0)
-    y = k * (cos(lat0)*sin(lat) - sin(lat0)*cos(lat)*cos(lon-lon0))
+    k = sqrt(2 / (1 + sin(lat0) * sin(lat) + cos(lat0) * cos(lat) * cos(lon - lon0)))
+    x = k * cos(lat) * sin(lon - lon0)
+    y = k * (cos(lat0) * sin(lat) - sin(lat0) * cos(lat) * cos(lon - lon0))
     return x, y

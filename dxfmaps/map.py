@@ -15,11 +15,17 @@ class Map:
     def __init__(self, path, continent=None, countries_set=None,
                  country_field='NAME', units='mm'):
         """
-        :param path: string specifying the path to the shapefile
-        :param continent: name to plot its countries
-        :param countries_set: set of countries you want to include in the map
-        :param country_field: name of the field in the shapefile that contains countries geometries
-        :param units: units to use for the output
+        :param path:
+            string specifying the path to the shapefile
+        :param continent:
+            name to plot its countries
+        :param countries_set:
+            set of countries you want to include in the map
+        :param country_field:
+            name of the field in the shapefile that contains countries
+            geometries
+        :param units:
+            units to use for the output
         """
         sf = shapefile.Reader(path)
         self.sf = sf
@@ -119,20 +125,33 @@ class Map:
 
         Then creates the set of countries if a continent was given.
 
-        Then it reads the countries from the shapefile.
+        Then creates the set of countries if a set of countries was given.
 
-        :return: list of Shapely Polygons
+        If not set of countries or continent is given, it creates a full map
+        of the world.
+
+        :return: list of Country objects
         """
         if self.countries_set and self.continent:
             raise ValueError("Cannot apply 2 filters.")
         elif self.continent:
             self.countries_set = self.get_countries(self.continent)
-        countries = []
-        for shapeRecord in self.sf.shapeRecords():
-            name = shapeRecord.record[self.country_field].lower()
-            if name in self.countries_set:
+        elif self.countries_set:
+            countries = []
+            for shapeRecord in self.sf.shapeRecords():
+                name = shapeRecord.record[self.country_field].lower()
+                if name in self.countries_set:
+                    geom = geometry.shape(shapeRecord.shape.__geo_interface__)
+                    countries.append(Country(get_polygons(geom), name))
+        else:
+            countries = []
+            names = []
+            for shapeRecord in self.sf.shapeRecords():
+                name = shapeRecord.record[self.country_field].lower()
+                names.append(name)
                 geom = geometry.shape(shapeRecord.shape.__geo_interface__)
                 countries.append(Country(get_polygons(geom), name))
+            self.countries_set = set(names)
         if not countries:
             raise ValueError("No countries found")
         return countries
@@ -173,13 +192,16 @@ class Map:
 
     def filter_by_area(self, area_limit=.5):
         new_countries = []
+        names = []
         for country in self.countries:
             new_country = country.filter_by_area(area_limit)
             if not new_country.contours:
                 print("{} didn't pass the area filter.".format(country.name))
                 continue
             new_countries.append(new_country)
+            names.append(country.name)
         self.countries = new_countries
+        self.countries_set = set(names)
 
     def item_info(self, row, field=None):
         """Prints every field and its values for the item in the specified row
@@ -265,18 +287,18 @@ class Map:
                 x.record.oid)
             )
 
-    def add_labels(self, box=False, centroid=False, uppercase=True, n=10):
+    def add_labels(self, box=False, centroid=False, uppercase=True, n=10, fast=False):
         for country in self.countries:
-            country.generate_labels(box, centroid, uppercase, n)
+            country.generate_labels(box, centroid, uppercase, n, fast=fast)
 
-    def to_png(self, filename='out.png', stroke_width=1.0, white_bg=False):
+    def to_png(self, filename='out.png', stroke=1.0, white_bg=True):
         height = int(self.height)
         width = int(self.width)
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
         context = cairo.Context(surface)
         context.set_line_cap(cairo.LINE_CAP_ROUND)
         context.set_line_join(cairo.LINE_JOIN_ROUND)
-        context.set_line_width(stroke_width)
+        context.set_line_width(stroke)
         if white_bg:
             with context:
                 context.set_source_rgb(1, 1, 1)

@@ -5,9 +5,6 @@ import random
 from operator import attrgetter
 import math
 
-# TODO: Delete temp_path
-TEMP_PATH = ("/Users/dani/dev/python/dxfmaps/shpf/10m-0-countries/"
-             "ne_10m_admin_0_countries.shp")
 WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
 WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
                    "ne_10m_admin_1_states_provinces.shp")
@@ -33,7 +30,7 @@ def greatest_contained_rectangle(polygon, points_count=20):
         points.append(random_point_in(polygon))
     print(points)
     end = time.time()
-    print("It took {0:.2f} seconds".format(end-start))
+    print("It took {0:.2f} seconds".format(end - start))
     return polygon
 
 

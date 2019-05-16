@@ -10,8 +10,8 @@ from .text import Text
 class Country:
     """
     Attributes:
-        self.contours: List of shapely polygons defining the contour of the country
-        self.name: The name of the country
+        self.contours: List of shapely polygons defining the contour of the
+        country self.name: The name of the country
     """
     def __init__(self, contours_list, name, labels=[]):
         self.contours = contours_list
@@ -43,11 +43,11 @@ class Country:
         new_polygons = []
         for polygon in self.contours:
             new_polygon = affinity.scale(
-                        polygon,
-                        xfact=scaling_factor,
-                        yfact=scaling_factor,
-                        origin=(0, 0)
-                    )
+                polygon,
+                xfact=scaling_factor,
+                yfact=scaling_factor,
+                origin=(0, 0)
+            )
             new_polygons.append(new_polygon)
         return Country(new_polygons, name=self.name)
 
@@ -78,9 +78,7 @@ class Country:
             new_elements.append(polygon.simplify(tolerance))
         return Country(new_elements, self.name)
 
-    def generate_labels(self, box, centroid, uppercase, n, verbose=True):
-        if verbose:
-            print("Generating labels for {}".format(self.name))
+    def generate_labels(self, box, centroid, uppercase, n, verbose=True, fast=False):
         new_polygons = []
         name = self.name
         for polygon in self.contours:
@@ -88,14 +86,21 @@ class Country:
                 name = name[0].upper() + name[1:]
             text = Text(name)
             ratio = text.width / text.height
-            inner_rectangles = []
-            while len(inner_rectangles) == 0:
-                print("Trying {} with {} points".format(self.name, n))
-                inner_rectangles = mrcd(polygon, n=n, ratio=ratio)
-                n += 5
-            rectangle = inner_rectangles[0]
+            # inner_rectangles = []
+            # while len(inner_rectangles) == 0:
+            #     print("Trying {} with {}^2 = {} points".format(
+            #         self.name,
+            #         n,
+            #         n**2
+            #     ))
+            #     inner_rectangles = mrcd(polygon, n=n, ratio=ratio)
+            #     n += 5
+            # rectangle = inner_rectangles[0]
+            if fast:
+                rectangle = self._inner_rectangle_fast(polygon)
+            elif not fast:
+                rectangle = self._inner_rectangle_slow(polygon, n, ratio, verbose)
             text.move_and_fit_box(rectangle)
-            # rectangle = utils.rectangle(polygon)
             if box:
                 new_polygons.append(rectangle)
             if centroid:
@@ -103,3 +108,21 @@ class Country:
                 new_polygons.append(cir_centroid)
             new_polygons.extend(text.polygons)
         self.labels = new_polygons
+
+    def _inner_rectangle_slow(self, polygon, n, ratio, verbose):
+        if verbose:
+            print("Generating labels for {}".format(self.name))
+        inner_rectangles = []
+        while len(inner_rectangles) == 0:
+            print("Trying {} with {}^2 = {} points".format(
+                self.name,
+                n,
+                n**2
+            ))
+            inner_rectangles = mrcd(polygon, n=n, ratio=ratio)
+            n += 5
+        rectangle = inner_rectangles[0]
+        return rectangle
+
+    def _inner_rectangle_fast(self, polygon):
+        return utils.inner_rectangle(polygon)

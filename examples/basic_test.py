@@ -1,15 +1,15 @@
 from dxfmaps.map import Map
 from dxfmaps.utils import WORLD_COUNTRIES
-from dxfmaps.projections import *
+from dxfmaps.projections import MERCATOR
 
 
 def main():
-    countries = {'Spain'}
+    countries = {'norway'}
     map = Map(WORLD_COUNTRIES, countries_set=countries)
-    map.filter_by_area(area_limit=9)
+    map.filter_by_area(area_limit=16)
     map.info()
     map.project(MERCATOR)
-    map.simplify(tolerance=.02)
+    map.simplify(tolerance=.05)
     map.translate_to_center()
     map.scale(705.6870651946915)
     # map.scale_to_width(1000)
