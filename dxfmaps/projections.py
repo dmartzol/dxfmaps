@@ -54,12 +54,6 @@ def winkel_tripel(lon, lat, lon0=0):
     return x, y
 
 
-def secant(x):
-    if cos(x) == 0:
-        return 0
-    return 1 / cos(x)
-
-
 def sinc(x):
     if x == 0:
         return 1
