@@ -2,10 +2,10 @@ import math
 from math import sin, cos, tan, acos, pi, radians, log, sqrt
 
 EARTH_RADIUS = 6378137
-MERCATOR = 'mercator'
-LAMBERTAZIMUTAL = 'lambert_azimuthal_equal_area'
-WINKEL_TRIPEL = 'winkel_tripel'
-AZIMUTAL_EQUIDISTANT = 'azimuthal_equidistant'
+MERCATOR = "mercator"
+LAMBERTAZIMUTAL = "lambert_azimuthal_equal_area"
+WINKEL_TRIPEL = "winkel_tripel"
+AZIMUTAL_EQUIDISTANT = "azimuthal_equidistant"
 
 
 def azimuthal_equidistant(lon, lat):
@@ -13,7 +13,7 @@ def azimuthal_equidistant(lon, lat):
     Transforms coordinates from GPS(WSG84) to Azimuthal (WIP)
     """
     x = lat * math.sin(lon)
-    y = - lat * math.cos(lon)
+    y = -lat * math.cos(lon)
     return x, y
 
 

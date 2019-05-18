@@ -5,24 +5,24 @@ from dxfmaps.projections import *
 
 def main():
     countries = {
-        'norway',
-        'spain',
-        'portugal',
-        'france',
-        'italy',
-        'germany',
-        'Denmark',
-        'Poland',
-        'sweden',
-        'Australia',
-        'russia',
-        'China'
+        "norway",
+        "spain",
+        "portugal",
+        "france",
+        "italy",
+        "germany",
+        "Denmark",
+        "Poland",
+        "sweden",
+        "Australia",
+        "russia",
+        "China",
     }
     map = Map(WORLD_COUNTRIES, countries_set=countries)
     map.filter_by_area(area_limit=4.0)
     map.info()
     map.project(MERCATOR)
-    map.simplify(tolerance=.001)
+    map.simplify(tolerance=0.001)
     map.translate_to_center()
     map.scale_to_width(3000)
     map.add_labels()

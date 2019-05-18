@@ -50,10 +50,10 @@ def mir(polygon: Polygon, resolution: int, ratio: float) -> List[Polygon]:
     n = len(points)
     max_area = 0
     rectangles = []
-    for i in range(1, n-2):
-        for j in range(i+1, n-1):
+    for i in range(1, n - 2):
+        for j in range(i + 1, n - 1):
             if u[i][j] != 0:
-                for k in range(j+1, n):
+                for k in range(j + 1, n):
                     if u[i][k] != 0 and perpendicular(u[i][j], u[i][k]):
                         point = get_opposite_point(points, j, i, k)
                         rect_points = [points[i], points[k], point, points[j]]
@@ -111,9 +111,9 @@ def compute_points(polygon: Polygon, n) -> List[Point]:
     _, _, maxx, maxy = rectangle.bounds
     l = max(maxx, maxy) / n
     points = []
-    for j in range(n+1):
-        for i in range(n+1):
-            point = Point(l*i, l*j)
+    for j in range(n + 1):
+        for i in range(n + 1):
+            point = Point(l * i, l * j)
             if polygon.contains(point):
                 points.append(point)
     return points
@@ -130,7 +130,7 @@ def distance(point_a, point_b):
     """
     x0, y0 = point_a
     x1, y1 = point_b
-    return math.hypot(x0-x1, y0-y1)
+    return math.hypot(x0 - x1, y0 - y1)
 
 
 def width_angle(rectangle: Polygon):
@@ -161,7 +161,7 @@ def slope(point_a, point_b):
     x1, y1 = point_b
     if x0 == x1:
         return None
-    return (y1-y0)/(x1-x0)
+    return (y1 - y0) / (x1 - x0)
 
 
 def slope_angle(slope):

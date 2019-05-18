@@ -42,7 +42,7 @@ class Text:
 
     @property
     def em_width(self):
-        m = shapely.wkt.loads(self.font['M'])
+        m = shapely.wkt.loads(self.font["M"])
         minx, miny, maxx, maxy = m.bounds
         em_width = maxx - minx
         return em_width
@@ -79,11 +79,7 @@ class Text:
         Scales the geometries to a specific width
         """
         multipolygon = geometry.MultiPolygon(self.polygons)
-        multipolygon = affinity.scale(
-            multipolygon,
-            xfact=factor,
-            yfact=factor
-        )
+        multipolygon = affinity.scale(multipolygon, xfact=factor, yfact=factor)
         self.polygons = [x for x in multipolygon]
 
     def translate_to(self, target):

@@ -12,8 +12,9 @@ from .utils import get_polygons, vertical_flip, polygons_to_svg
 
 
 class Map:
-    def __init__(self, path, continent=None, countries_set=None,
-                 country_field='NAME', units='mm'):
+    def __init__(
+        self, path, continent=None, countries_set=None, country_field="NAME", units="mm"
+    ):
         """
         :param path:
             string specifying the path to the shapefile
@@ -103,13 +104,9 @@ class Map:
         """
         for shapeRecord in self.sf.shapeRecords():
             geom = geometry.shape(shapeRecord.shape.__geo_interface__)
-            is_polygon = isinstance(
-                geom,
-                shapely.geometry.polygon.Polygon
-            )
+            is_polygon = isinstance(geom, shapely.geometry.polygon.Polygon)
             is_multipolygon = isinstance(
-                geom,
-                shapely.geometry.multipolygon.MultiPolygon
+                geom, shapely.geometry.multipolygon.MultiPolygon
             )
             if not (is_polygon or is_multipolygon):
                 print(type(geom))
@@ -178,7 +175,7 @@ class Map:
 
         :return: None
         """
-        print('-------- info --------')
+        print("-------- info --------")
         print("{} countries".format(len(self.countries)))
         for country in self.countries:
             count = len(country.contours)
@@ -190,7 +187,7 @@ class Map:
             # for p in country.contours:
             #     print("\t\t Area {0:.4f}".format(p.area))
 
-    def filter_by_area(self, area_limit=.5):
+    def filter_by_area(self, area_limit=0.5):
         new_countries = []
         names = []
         for country in self.countries:
@@ -237,8 +234,8 @@ class Map:
         Translates all the geometries to the origin (0, 0)
         """
         minx, miny, maxx, maxy = self.bounds
-        x_offset = - min(minx, maxx)
-        y_offset = - min(miny, maxy)
+        x_offset = -min(minx, maxx)
+        y_offset = -min(miny, maxy)
         new_elements = []
         for country in self.countries:
             new_elements.append(country.translate(x_offset, y_offset))
@@ -268,7 +265,7 @@ class Map:
             new_elements.append(country.scale(self.scaling_factor))
         self.countries = new_elements
 
-    def simplify(self, tolerance=.0002, verbose=True):
+    def simplify(self, tolerance=0.0002, verbose=True):
         """
         Removes nodes from the path of every polygon according to tolerance
 
@@ -282,16 +279,13 @@ class Map:
 
     def list_of_countries(self):
         for x in self.sf.shapeRecords():
-            print("Name: {} ({})".format(
-                x.record[self.country_field],
-                x.record.oid)
-            )
+            print("Name: {} ({})".format(x.record[self.country_field], x.record.oid))
 
     def add_labels(self, box=False, centroid=False, uppercase=True, n=10, fast=False):
         for country in self.countries:
             country.generate_labels(box, centroid, uppercase, n, fast=fast)
 
-    def to_png(self, filename='out.png', stroke=1.0, white_bg=True):
+    def to_png(self, filename="out.png", stroke=1.0, white_bg=True):
         height = int(self.height)
         width = int(self.width)
         surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
@@ -318,28 +312,22 @@ class Map:
         context.stroke()
         surface.write_to_png(filename)
 
-    def to_dxf(self, filename='out.dxf'):
-        drawing = ezdxf.new('R2000')
+    def to_dxf(self, filename="out.dxf"):
+        drawing = ezdxf.new("R2000")
         modelspace = drawing.modelspace()
-        drawing.layers.new(name='Labels', dxfattribs={'color': 7})
-        drawing.layers.new(name='Contours', dxfattribs={'color': 1})
+        drawing.layers.new(name="Labels", dxfattribs={"color": 7})
+        drawing.layers.new(name="Contours", dxfattribs={"color": 1})
         for country in self.countries:
             for polygon in country.contours:
                 vertices = list(polygon.exterior.coords)
-                modelspace.add_lwpolyline(
-                    vertices,
-                    dxfattribs={'layer': 'Contours'}
-                )
+                modelspace.add_lwpolyline(vertices, dxfattribs={"layer": "Contours"})
             if country.labels:
                 for polygon in country.labels:
                     vertices = list(polygon.exterior.coords)
-                    modelspace.add_lwpolyline(
-                        vertices,
-                        dxfattribs={'layer': 'Labels'}
-                    )
+                    modelspace.add_lwpolyline(vertices, dxfattribs={"layer": "Labels"})
         drawing.saveas(filename)
 
-    def to_svg(self, filename='out.svg', stroke=.5, buffered=False, labels=False):
+    def to_svg(self, filename="out.svg", stroke=0.5, buffered=False, labels=False):
         polygons = []
         polygons.extend(self.as_polygons)
         polygons.extend(self.labels_as_polygons)
@@ -348,7 +336,7 @@ class Map:
             filename=filename,
             width=self.width,
             units=self.units,
-            stroke_width=stroke
+            stroke_width=stroke,
         )
         if buffered:
             raise NotImplementedError("Buffered is not implemented yet")
@@ -356,8 +344,8 @@ class Map:
             interior = interior.buffer(-1.0, cap_style=2, join_style=1)
             polygons_to_svg(
                 interior,
-                filename='buffered.svg',
+                filename="buffered.svg",
                 width=self.width,
                 units=self.units,
-                stroke_width=stroke_width
+                stroke_width=stroke_width,
             )

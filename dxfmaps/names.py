@@ -1,4 +1,3 @@
-
 spanish_comunities = [
     "Castilla y leon, Spain",
     "Andalucia, Spain",
@@ -15,7 +14,7 @@ spanish_comunities = [
     "Cantabria, Spain",
     "La rioja, Spain",
     "Portugal",
-    "Euskadi, Spain"
+    "Euskadi, Spain",
 ]
 
 USA = [
@@ -67,5 +66,5 @@ USA = [
     "Florida",
     "Minnesota",
     "Alabama",
-    "Missouri"
+    "Missouri",
 ]

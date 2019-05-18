@@ -6,8 +6,7 @@ from operator import attrgetter
 import math
 
 WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
-WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
-                   "ne_10m_admin_1_states_provinces.shp")
+WORLD_PROVINCES = "/shpf/10m-1-states-provinces/" "ne_10m_admin_1_states_provinces.shp"
 
 # TODO: Separate into geometry.py
 
@@ -63,11 +62,7 @@ def vertical_flip_old(geometry):
     """
     if not isinstance(geometry, MultiPolygon):
         raise ValueError("Argument must be a multipolygon")
-    result = affinity.scale(
-        geometry,
-        xfact=1.0,
-        yfact=-1.0
-    )
+    result = affinity.scale(geometry, xfact=1.0, yfact=-1.0)
     return result
 
 
@@ -78,11 +73,7 @@ def vertical_flip(polygons_list):
     rtype: list of shapely Polygons
     """
     multi = MultiPolygon(polygons_list)
-    multi = affinity.scale(
-        multi,
-        xfact=1.0,
-        yfact=-1.0
-    )
+    multi = affinity.scale(multi, xfact=1.0, yfact=-1.0)
     return [x for x in multi]
 
 
@@ -103,7 +94,7 @@ def max_area_polygon(multipolygon):
     Returns the polygon with greatest area inside a multipolygon
     """
     # TODO - Try without using attrgetter
-    return max(multipolygon, key=attrgetter('area'))
+    return max(multipolygon, key=attrgetter("area"))
 
 
 def multipolygon_to_polygon(geometry):  # TODO: Deprecated?
@@ -118,7 +109,7 @@ def multipolygon_to_polygon(geometry):  # TODO: Deprecated?
     elif isinstance(geometry, MultiPolygon):
         return max_area_polygon(geometry)
     else:
-        raise Exception('Non valid geometry')
+        raise Exception("Non valid geometry")
 
 
 def get_polygons(geometry):
@@ -132,7 +123,7 @@ def get_polygons(geometry):
     elif isinstance(geometry, MultiPolygon):
         return list(geometry)
     else:
-        raise Exception('Non valid geometry {}'.format(type(geometry)))
+        raise Exception("Non valid geometry {}".format(type(geometry)))
 
 
 def centroid_as_polygon(rectangle, relative_size=0.05):
@@ -145,6 +136,7 @@ def centroid_as_polygon(rectangle, relative_size=0.05):
     c = max(h, w) * relative_size
     return rectangle.centroid.buffer(c)
 
+
 # TODO: Deprecated
 
 
@@ -154,7 +146,7 @@ def rectangle_angle(rectangle):
     """
     x0, y0 = rectangle.exterior.coords[0]
     x1, y1 = rectangle.exterior.coords[1]
-    angle = math.atan2(y1-y0, x1-x0)
+    angle = math.atan2(y1 - y0, x1 - x0)
     return math.degrees(angle)
 
 
@@ -164,7 +156,7 @@ def distance(point_a, point_b):
     """
     x0, y0 = point_a
     x1, y1 = point_b
-    return math.hypot(x0-x1, y0-y1)
+    return math.hypot(x0 - x1, y0 - y1)
 
 
 def slope(point_a, point_b):
@@ -172,7 +164,7 @@ def slope(point_a, point_b):
     x1, y1 = point_b
     if x0 == x1:
         return None
-    return (y1-y0)/(x1-x0)
+    return (y1 - y0) / (x1 - x0)
 
 
 def slope_angle(slope):
@@ -268,21 +260,25 @@ def countries_by_continent(sf, continent):
     """
     records = sf.records()
     for item in records:
-        if item['CONTINENT'] == continent:
+        if item["CONTINENT"] == continent:
             print(item["NAME"], item.oid)
 
 
-def polygons_to_svg(list_of_polygons, filename='out.svg', stroke_width=1.0, width=500, units="px"):
+def polygons_to_svg(
+    list_of_polygons, filename="out.svg", stroke_width=1.0, width=500, units="px"
+):
     size_and_units = "{}{}".format(str(width), units)
     minx, miny, maxx, maxy = MultiPolygon(list_of_polygons).bounds
-    polygon_template = "\n<polygon stroke=\"black\" stroke-width=\"{}\" fill=\"none\" points=\"{} \"/>\n"
-    file = open(filename, 'w')
+    polygon_template = (
+        '\n<polygon stroke="black" stroke-width="{}" fill="none" points="{} "/>\n'
+    )
+    file = open(filename, "w")
     svg_style = """
                 <svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\"
                 width=\"{}\" height=\"{}\" viewBox=\"{} {} {} {}\"> \n
                 """
     file.write(svg_style.format(size_and_units, size_and_units, 0, 0, maxx, maxy))
-    file.write("<g transform=\"translate(0,{}) scale(1,-1)\">\n".format(maxy))
+    file.write('<g transform="translate(0,{}) scale(1,-1)">\n'.format(maxy))
     list_of_coords = []
     for polygon in list_of_polygons:
         for x, y in polygon.exterior.coords:

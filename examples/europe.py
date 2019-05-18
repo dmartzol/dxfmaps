@@ -15,62 +15,62 @@ def main():
     map.translate_to_center()
     map.scale_to_width(2000)
     scaling_factor = map.scaling_factor
-    map.to_dxf(filename='europe.dxf')
-    map.to_png(filename='europe.png', white_bg=True)
+    map.to_dxf(filename="europe.dxf")
+    map.to_png(filename="europe.png", white_bg=True)
 
     countries = map.countries_set
     countries = {
-            'slovakia',
-            'spain',
-            'norway',
-            'italy',
-            'slovenia',
-            'san marino',
-            'andorra',
-            'croatia',
-            'moldova',
-            'hungary',
-            'denmark',
-            'latvia',
-            'ireland',
-            'serbia',
-            'åland',
-            'malta',
-            'bosnia and herz.',
-            'austria',
-            'czechia',
-            'switzerland',
-            'portugal',
-            'lithuania',
-            'poland',
-            'sweden',
-            'liechtenstein',
-            'russia',
-            'france',
-            'estonia',
-            'germany',
-            'greece',
-            'jersey',
-            'kosovo',
-            'belgium',
-            'romania',
-            'isle of man',
-            'united kingdom',
-            'montenegro',
-            'netherlands',
-            'luxembourg',
-            'iceland',
-            'ukraine',
-            'belarus',
-            'macedonia',
-            'faeroe is.',
-            'guernsey',
-            'bulgaria',
-            'gibraltar',
-            'albania',
-            'vatican',
-            'monaco',
-            'finland'
+        "slovakia",
+        "spain",
+        "norway",
+        "italy",
+        "slovenia",
+        "san marino",
+        "andorra",
+        "croatia",
+        "moldova",
+        "hungary",
+        "denmark",
+        "latvia",
+        "ireland",
+        "serbia",
+        "åland",
+        "malta",
+        "bosnia and herz.",
+        "austria",
+        "czechia",
+        "switzerland",
+        "portugal",
+        "lithuania",
+        "poland",
+        "sweden",
+        "liechtenstein",
+        "russia",
+        "france",
+        "estonia",
+        "germany",
+        "greece",
+        "jersey",
+        "kosovo",
+        "belgium",
+        "romania",
+        "isle of man",
+        "united kingdom",
+        "montenegro",
+        "netherlands",
+        "luxembourg",
+        "iceland",
+        "ukraine",
+        "belarus",
+        "macedonia",
+        "faeroe is.",
+        "guernsey",
+        "bulgaria",
+        "gibraltar",
+        "albania",
+        "vatican",
+        "monaco",
+        "finland",
     }
 
     for country in countries:
@@ -82,8 +82,8 @@ def main():
         map_by_pieces.translate_to_center()
         map_by_pieces.scale(scaling_factor)
         map_by_pieces.add_labels(n=35)
-        map_by_pieces.to_svg(filename=country + '.svg')
-        map_by_pieces.to_dxf(filename=country + '.dxf')
+        map_by_pieces.to_svg(filename=country + ".svg")
+        map_by_pieces.to_dxf(filename=country + ".dxf")
         break
 
 

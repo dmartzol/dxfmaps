@@ -1,4 +1,3 @@
-
 def shapefile2polygons(sf, continent=None, min_area=None):
     if continent is None:
         geoms = [build_polygon(shapeRecord) for shapeRecord in sf.shapeRecords()]
@@ -18,7 +17,7 @@ def build_polygon(shapeRecord):
     elif isinstance(geom, shapely.geometry.multipolygon.MultiPolygon):
         return max_area_polygon(geom)
     else:
-        raise Exception('Found non valid geometry')
+        raise Exception("Found non valid geometry")
 
 
 def max_area_polygon(multipolygon):
@@ -43,15 +42,17 @@ def fetch(list_of_names):
 
 
 def shapefile2polygons_old2(self):
-        if self.continent is None:
-            geoms = [self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()]
-        else:
-            geoms = []
-            for shapeRecord in self.sf.shapeRecords():
-                if shapeRecord.record["CONTINENT"] == self.continent:
-                    geoms.append(self.build_polygon(shapeRecord))
-        assert len(geoms) > 0, "Countries not found"
-        return geoms
+    if self.continent is None:
+        geoms = [
+            self.build_polygon(shapeRecord) for shapeRecord in self.sf.shapeRecords()
+        ]
+    else:
+        geoms = []
+        for shapeRecord in self.sf.shapeRecords():
+            if shapeRecord.record["CONTINENT"] == self.continent:
+                geoms.append(self.build_polygon(shapeRecord))
+    assert len(geoms) > 0, "Countries not found"
+    return geoms
 
 
 def shapefile2polygons_old(sf):
@@ -77,11 +78,12 @@ def dataframe2polygons(geodataframe):
             # TODO: Convert linestring to polygon
             # polygons.append(row.geometry)
         else:
-            raise Exception('Found non valid geometry')
+            raise Exception("Found non valid geometry")
     return polygons
+
 
 def scale_adjust(n):  # TODO: Deprecated
     """
     Adjusting scale of text in a DXF layer
     """
-    return -1.3624*(0.001 - n)
+    return -1.3624 * (0.001 - n)
