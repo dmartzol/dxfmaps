@@ -81,7 +81,7 @@ def main():
         map_by_pieces.project(MERCATOR)
         map_by_pieces.translate_to_center()
         map_by_pieces.scale(scaling_factor)
-        map_by_pieces.add_labels(n=35)
+        map_by_pieces.add_labels(fast=False)
         map_by_pieces.to_svg(filename=country + ".svg")
         map_by_pieces.to_dxf(filename=country + ".dxf")
         break

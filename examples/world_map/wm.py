@@ -173,6 +173,7 @@ def main():
     print(map.bounds)
     scaling_factor = map.scaling_factor
     map.to_dxf(filename="world.dxf")
+    map.to_svg(filename="world.svg")
     map.to_png(filename="world.png", white_bg=True)
 
     # for country in countries:

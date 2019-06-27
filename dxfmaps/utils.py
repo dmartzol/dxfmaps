@@ -6,7 +6,8 @@ from operator import attrgetter
 import math
 
 WORLD_COUNTRIES = "../shpf/10m-0-countries/ne_10m_admin_0_countries.shp"
-WORLD_PROVINCES = "/shpf/10m-1-states-provinces/" "ne_10m_admin_1_states_provinces.shp"
+WORLD_PROVINCES = ("/shpf/10m-1-states-provinces/"
+                   "ne_10m_admin_1_states_provinces.shp")
 
 # TODO: Separate into geometry.py
 

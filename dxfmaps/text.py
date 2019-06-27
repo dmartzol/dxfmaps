@@ -1,7 +1,5 @@
-import shapely
 import shapely.wkt
-from shapely import affinity
-from shapely import geometry
+from shapely import affinity, geometry
 from dxfmaps import utils
 from .fonts import *
 import cairocffi as cairo

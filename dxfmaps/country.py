@@ -1,8 +1,5 @@
-import shapely
-from shapely import affinity
-from shapely import geometry
-from dxfmaps import projections
-from dxfmaps import utils
+from shapely import affinity, geometry
+from dxfmaps import projections, utils
 from dxfmaps.rectangle import mrcd
 from .text import Text
 

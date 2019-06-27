@@ -1,5 +1,4 @@
 import shapefile
-import shapely
 import cairocffi as cairo
 import ezdxf
 from shapely import geometry
@@ -7,8 +6,6 @@ from shapely.geometry import Polygon, MultiPolygon
 from typing import List
 from dxfmaps.country import Country
 from .utils import get_polygons, vertical_flip, polygons_to_svg
-
-# TODO: Separate information methods in a different class
 
 
 class Map:
@@ -42,7 +39,7 @@ class Map:
 
     @property
     def as_polygons(self) -> List[Polygon]:
-        """Return the contours of all countries as a list of     shapely polygons
+        """Return the contours of all countries as a list of shapely polygons
         :return: list of shapely polygons
         """
         all_polygons = []
@@ -66,7 +63,7 @@ class Map:
         """Return a shapely multipolygon containing all contours of the countries
         :return: Shapely MultiPolygon
         """
-        return shapely.geometry.MultiPolygon(self.as_polygons)
+        return geometry.MultiPolygon(self.as_polygons)
 
     @property
     def bounds(self):
@@ -104,9 +101,9 @@ class Map:
         """
         for shapeRecord in self.sf.shapeRecords():
             geom = geometry.shape(shapeRecord.shape.__geo_interface__)
-            is_polygon = isinstance(geom, shapely.geometry.polygon.Polygon)
+            is_polygon = isinstance(geom, geometry.polygon.Polygon)
             is_multipolygon = isinstance(
-                geom, shapely.geometry.multipolygon.MultiPolygon
+                geom, geometry.multipolygon.MultiPolygon
             )
             if not (is_polygon or is_multipolygon):
                 print(type(geom))
@@ -133,7 +130,7 @@ class Map:
             raise ValueError("Cannot apply 2 filters.")
         elif self.continent:
             self.countries_set = self.get_countries(self.continent)
-        elif self.countries_set:
+        if self.countries_set:
             countries = []
             for shapeRecord in self.sf.shapeRecords():
                 name = shapeRecord.record[self.country_field].lower()

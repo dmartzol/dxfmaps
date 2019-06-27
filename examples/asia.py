@@ -11,7 +11,7 @@ def main():
     map.project(MERCATOR)
     map.translate_to_center()
     map.scale_to_width(3000)
-    map.add_labels()
+    map.add_labels(fast=True)
     map.to_png()
 
 

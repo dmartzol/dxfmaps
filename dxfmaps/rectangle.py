@@ -8,7 +8,8 @@ def mrcd(polygon: Polygon, n=20, ratio=None) -> List[Polygon]:
     """
     Finding the largest area rectangle of arbitrary orientation in
     a closed contour.
-    Rubén Molano, Pablo G. Rodriguez, Andres Caro, M. Luisa Duran.
+    Implemented from the paper writen by Rubén Molano, Pablo G. Rodriguez,
+    Andres Caro, M. Luisa Duran.
 
     :param ratio:
     :param n:
@@ -36,7 +37,6 @@ def mrcd(polygon: Polygon, n=20, ratio=None) -> List[Polygon]:
 
 def mir(polygon: Polygon, resolution: int, ratio: float) -> List[Polygon]:
     """
-
     :param ratio:
     :param polygon:
     :param resolution: number of points per side
